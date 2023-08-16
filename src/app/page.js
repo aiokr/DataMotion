@@ -28,22 +28,23 @@ export function HomePage() {
   });
 
   const chartRef = useRef(null);// 使用useRef Hook创建一个引用，用于存储图表实例
-
-
   const [frameCount, setFrameCount] = useState(0); // 使用一个计数器来生成唯一的key
   const [frames, setFrames] = useState([]); // 新增状态变量frames
   const frameRefs = useRef([]);// 使用useRef Hook创建一个引用，用于存储所有代码编辑器的引用
+  const frameTimes = useRef([]);// 使用useRef Hook创建一个引用，用于存储持续时间的引用
 
   // 定义一个函数，用于处理点击Reload按钮的事件
   const handleClick = () => {
     let i = 0;
+    // 持续时间
     const loadNextFrame = () => {
       if (i >= frames.length) {
         return;
       }
       const key = frames[i];
       const frameRef = frameRefs.current.find((ref, index) => frames[index] === key);
-      if (!frameRef || !frameRef.current) {
+      const frameTime = frameTimes.current.find((ref, index) => frames[index] === key);
+      if (!frameRef || !frameRef.current || !frameTime || !frameTime.current) {
         console.error(`No ref found for frame ${key}`);
         return;
       }
@@ -54,7 +55,7 @@ export function HomePage() {
         console.error('Invalid option:', error);
       }
       i++;
-      setTimeout(loadNextFrame, 1000);
+      setTimeout(loadNextFrame, Number(frameTime.current.value) * 1000);
     };
     loadNextFrame();
   };
@@ -64,7 +65,9 @@ export function HomePage() {
     setFrameCount(prevCount => prevCount + 1); // 每次添加一个新元素时，都增加计数器的值
     setFrames(prevFrames => [...prevFrames, frameCount]); // 使用计数器的值作为新元素的key
     frameRefs.current.push(createRef()); // 为新的frame创建一个新的引用，并将其添加到frameRefs数组中
+    frameTimes.current.push(createRef()); // 为新的frame创建一个新的引用，并将其添加到frameTimes数组中
   };
+
 
   const handleDeleteFrame = (keyToDelete) => {
     setFrames(prevFrames => prevFrames.filter(key => key !== keyToDelete));
@@ -99,7 +102,7 @@ export function HomePage() {
         <div className='grid grid-cols-3 gap-2'>
           {frames.map((key, index) => (
             <div key={key} className='w-full  bg-white p-2 block col-span-3'>
-              {key}
+              DataFrame Key: {key} / Index: {index} / Time <input ref={frameTimes.current[index]}></input>
               <textarea ref={frameRefs.current[index]} className='border w-full h-48 p-2' />
               <button onClick={() => handleDeleteFrame(key)} className='p-2 my-2 flex flex-col items-center bg-white'>Delete</button>
             </div>
