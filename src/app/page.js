@@ -38,7 +38,7 @@ export function HomePage() {
   // 定义一个函数，用于处理点击Reload按钮的事件
   const handleClick = () => {
     let i = 0;
-    // 持续时间
+
     const loadNextFrame = () => {
       if (i >= frames.length) {
         return;
@@ -57,9 +57,25 @@ export function HomePage() {
         console.error('Invalid option:', error);
       }
       i++;
+      // 持续时间
       setTimeout(loadNextFrame, Number(frameTime.current.value) * 1000);
     };
     loadNextFrame();
+  };
+
+  // 数据帧预览
+  const preivewFrame = (keyToPreview) => {
+    const frameRef = frameRefs.current.find((ref, index) => frames[index] === keyToPreview);
+    if (!frameRef || !frameRef.current) {
+      console.error(`No ref found for frame ${keyToPreview}`);
+      return;
+    }
+    try {
+      const newOption = eval(`(${frameRef.current.value})`);
+      chartRef.current.setOption(newOption, true);
+    } catch (error) {
+      console.error('Invalid option:', error);
+    }
   };
 
   //数据帧的增加与删除
@@ -114,7 +130,7 @@ export function HomePage() {
     }));
   };
 
- // 新增一个函数，用于切换指定key的 可视化编辑器 的显示/隐藏状态
+  // 新增一个函数，用于切换指定key的 可视化编辑器 的显示/隐藏状态
   const toggleNewEditor = (key) => {
     setNeoEditVisibility(prevState => ({
       ...prevState,
@@ -180,10 +196,14 @@ export function HomePage() {
                 style={{ display: textareaVisibility[key] ? 'none' : 'block' }}
               />
               {/* 可视化编辑器 */}
-              <div 
-              className='w-full p-2 my-2 '
-              style={{ display: NeoEditVisibility[key] ? 'block' : 'none' }}>Neo Editor (Codeing……) </div>
-              <button onClick={() => handleDeleteFrame(key)} className='mt-4 py-1 px-2 text-sm text-red-400 border-red-500 border-2 rounded-lg'>Delete</button>
+              <div
+                className='w-full p-2 my-2 '
+                style={{ display: NeoEditVisibility[key] ? 'block' : 'none' }}>Neo Editor (Codeing……) </div>
+              <div className='mt-4 flex gap-2'>
+                <button onClick={() => preivewFrame(key)} className='flex-1 py-1 px-2 text-sm  border-2 rounded-lg'>Preivew</button>
+                <button onClick={() => handleDeleteFrame(key)} className='py-1 px-2 text-sm text-red-400 border-red-500 border-2 rounded-lg float-right'>Delete</button>
+              </div>
+
             </div>
           ))}
         </div>
