@@ -75,6 +75,34 @@ export function HomePage() {
     frameRefs.current.splice(indexToDelete, 1);
   };
 
+  const handleMoveUp = (key) => {
+    setFrames(prevFrames => {
+      const frameIndex = prevFrames.findIndex(frame => frame === key);
+      if (frameIndex === 0) { // 如果已经在最顶部，无法再向上移动
+        return prevFrames;
+      }
+      const updatedFrames = [...prevFrames];
+      const temp = updatedFrames[frameIndex - 1];
+      updatedFrames[frameIndex - 1] = updatedFrames[frameIndex];
+      updatedFrames[frameIndex] = temp;
+      return updatedFrames;
+    });
+  };
+
+  const handleMoveDown = (key) => {
+    setFrames(prevFrames => {
+      const frameIndex = prevFrames.findIndex(frame => frame === key);
+      if (frameIndex === prevFrames.length - 1) { // 如果已经在最底部，无法再向下移动
+        return prevFrames;
+      }
+      const updatedFrames = [...prevFrames];
+      const temp = updatedFrames[frameIndex + 1];
+      updatedFrames[frameIndex + 1] = updatedFrames[frameIndex];
+      updatedFrames[frameIndex] = temp;
+      return updatedFrames;
+    });
+  };
+
 
   useEffect(() => {
     while (frameRefs.current.length < frames.length) {
@@ -103,6 +131,8 @@ export function HomePage() {
           {frames.map((key, index) => (
             <div key={key} className='w-full  bg-white p-2 block col-span-3'>
               DataFrame Key: {key} / Index: {index} / Time <input ref={frameTimes.current[index]}></input>
+              <button onClick={() => handleMoveUp(key)}>Move Up</button>
+              <button onClick={() => handleMoveDown(key)}>Move Down</button>
               <textarea ref={frameRefs.current[index]} className='border w-full h-48 p-2' />
               <button onClick={() => handleDeleteFrame(key)} className='p-2 my-2 flex flex-col items-center bg-white'>Delete</button>
             </div>
