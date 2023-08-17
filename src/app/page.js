@@ -145,24 +145,24 @@ export function HomePage() {
   }, [frames.length]);
 
   return (
-    <main className="grid grid-cols-12 h-screen w-screen gap-6 p-6 bg-zinc-800 text-zinc-100">
-      <div className='col-span-6' >
+    <main className="grid grid-cols-none grid-rows-6 md:grid-rows-none md:grid-cols-12 h-screen w-screen gap-6 p-6 bg-zinc-800 text-zinc-100">
+      <div className='row-span-2 md:col-span-6'>
         <div className='text-xl font-medium pb-2'>Chart Area</div>
-        <section id='ChartArea' className='aspect-video bg-white p-2'>
+        <section id='ChartArea' className='aspect-video bg-white p-2 w-[95%] my-0 mx-[auto] md:w-full'>
           <EChartsComponent option={option} onChartReady={chart => chartRef.current = chart} />
         </section>
-        <div className='grid grid-cols-3 gap-2 my-6'>
-          <button onClick={handleClick} className='p-2 flex flex-col items-center border rounded-full'>Reload</button>
+        <div className='grid grid-cols-3 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
+          <button onClick={handleClick} className='px-1 md:p-2 flex flex-col items-center border rounded-full'>Reload</button>
         </div>
       </div>
-      <section id="EditArea" className='col-span-6'>
+      <section id="EditArea" className='row-span-4 md:col-span-6'>
         <div className='text-xl font-medium pb-2'>DataFrame Editor</div>
-        <div className='pb-2 overflow-y-auto w-[98%] h-[calc(100vh-140px)]'>
+        <div className='pb-2 overflow-y-auto h-[80%] w-[95%] md:w-[98%] md:h-[calc(100vh-140px)] mx-[auto]'>
           {frames.map((key, index) => (
             <div key={key} className='w-full bg-zinc-600 p-4 mb-4 transition rounded-lg block'>
               <div className='py-2 grid grid-cols-12'>
                 <div className='col-span-11'>
-                  <div className='text-xl font-bold pb-2'>DataFrame Key: {key} / Index: {index}</div>
+                  <div className='text-lg md:text-xl font-bold pb-2'>DataFrame Key: {key} / Index: {index}</div>
                   <div>
                     Time <input ref={frameTimes.current[index]} className='bg-zinc-800 p-2 ml-2 rounded-lg'></input>
                   </div>
@@ -207,8 +207,8 @@ export function HomePage() {
             </div>
           ))}
         </div>
-        <div id='EditFloatButton' className=''>
-          <button onClick={handleNewFrame} className=' my-4  py-2 px-4  border rounded-full'>New DataFrame</button>
+        <div id='EditFloatButton' className='grid grid-cols-2 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
+          <button onClick={handleNewFrame} className='px-1 md:p-2 flex flex-col items-center border rounded-full'>New DataFrame</button>
         </div>
       </section>
     </main >
