@@ -34,6 +34,8 @@ export function HomePage() {
   const frameTimes = useRef([]);// 使用useRef Hook创建一个引用，用于存储持续时间的引用
   const [textareaVisibility, setTextareaVisibility] = useState({}); // 新增状态变量textareaVisibility
   const [NeoEditVisibility, setNeoEditVisibility] = useState({}); // 新增状态变量NeoEditVisibility
+  const [newFrameContent, setNewFrameContent] = useState(''); // 
+  const [newFrameTime, setNewFrameTime] = useState(''); //
 
   // 定义一个函数，用于处理点击Reload按钮的事件
   const handleClick = () => {
@@ -78,7 +80,7 @@ export function HomePage() {
     }
   };
 
-  //数据帧的增加与删除
+  //数据帧的增加
   const handleNewFrame = () => {
     setFrameCount(prevCount => prevCount + 1); // 每次添加一个新元素时，都增加计数器的值
     setFrames(prevFrames => [...prevFrames, frameCount]); // 使用计数器的值作为新元素的key
@@ -86,7 +88,43 @@ export function HomePage() {
     frameTimes.current.push(createRef()); // 为新的frame创建一个新的引用，并将其添加到frameTimes数组中
   };
 
+  //带有参数的数据帧的增加
+  const newFrame = (frameContent = '', frameTime = '') => {
+    setFrameCount(prevCount => prevCount + 1); // 每次添加一个新元素时，都增加计数器的值
+    setFrames(prevFrames => [...prevFrames, frameCount]); // 使用计数器的值作为新元素的key
+    frameRefs.current.push(frameContent); // 将frameContent添加到frameRefs数组中
+    frameTimes.current.push(frameTime); // 将frameTime添加到frameTimes数组中
+  };
 
+  //数据帧的复制
+const duplicateFrame = (keyToDuplicate) => {
+  const frameToDuplicate = frameRefs.current.find((ref, index) => frames[index] === keyToDuplicate);
+  const timeToDuplicate = frameTimes.current.find((ref, index) => frames[index] === keyToDuplicate);
+  if (!frameToDuplicate || !frameToDuplicate.current || !timeToDuplicate || !timeToDuplicate.current) {
+    console.error(`No ref found for frame ${keyToDuplicate}`);
+    return;
+  }
+  setNewFrameContent(frameToDuplicate.current.value);
+  setNewFrameTime(timeToDuplicate.current.value);
+  newFrame(frameToDuplicate.current, timeToDuplicate.current);
+};
+
+useEffect(() => {
+  if (newFrameContent !== '' && frameRefs.current.length > 0) {
+    const newFrameRef = frameRefs.current[frameRefs.current.length - 1];
+    if (newFrameRef && newFrameRef.current) {
+      newFrameRef.current.value = newFrameContent;
+    }
+  }
+  if (newFrameTime !== '' && frameTimes.current.length > 0) {
+    const newTimeRef = frameTimes.current[frameTimes.current.length - 1];
+    if (newTimeRef && newTimeRef.current) {
+      newTimeRef.current.value = newFrameTime;
+    }
+  }
+}, [newFrameContent, newFrameTime]);
+
+  //数据帧的删除
   const handleDeleteFrame = (keyToDelete) => {
     setFrames(prevFrames => prevFrames.filter(key => key !== keyToDelete));
     const indexToDelete = frameRefs.current.findIndex((ref, index) => frames[index] === keyToDelete);
@@ -201,6 +239,7 @@ export function HomePage() {
                 style={{ display: NeoEditVisibility[key] ? 'block' : 'none' }}>Neo Editor (Codeing……) </div>
               <div className='mt-4 flex gap-2'>
                 <button onClick={() => preivewFrame(key)} className='flex-1 py-1 px-2 text-sm  border-2 rounded-lg'>Preivew</button>
+                <button onClick={() => duplicateFrame(key)} className='flex-1 py-1 px-2 text-sm  border-2 rounded-lg'>Duplicate</button>
                 <button onClick={() => handleDeleteFrame(key)} className='py-1 px-2 text-sm text-red-400 border-red-500 border-2 rounded-lg float-right'>Delete</button>
               </div>
 
