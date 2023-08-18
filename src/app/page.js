@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, createRef } from 'react';
 import EChartsComponent from './components/EChartsComponent';
+import NeoFrameEditor from './components/NeoFrameEditor';
 
 export function HomePage() {
 
@@ -39,6 +40,7 @@ export function HomePage() {
 
   // 定义一个函数，用于处理点击Reload按钮的事件
   const handleClick = () => {
+    console.log('Reload ECharts');
     let i = 0;
 
     const loadNextFrame = () => {
@@ -67,6 +69,7 @@ export function HomePage() {
 
   // 数据帧预览
   const preivewFrame = (keyToPreview) => {
+    console.log(keyToPreview, frameRefs)
     const frameRef = frameRefs.current.find((ref, index) => frames[index] === keyToPreview);
     if (!frameRef || !frameRef.current) {
       console.error(`No ref found for frame ${keyToPreview}`);
@@ -97,32 +100,32 @@ export function HomePage() {
   };
 
   //数据帧的复制
-const duplicateFrame = (keyToDuplicate) => {
-  const frameToDuplicate = frameRefs.current.find((ref, index) => frames[index] === keyToDuplicate);
-  const timeToDuplicate = frameTimes.current.find((ref, index) => frames[index] === keyToDuplicate);
-  if (!frameToDuplicate || !frameToDuplicate.current || !timeToDuplicate || !timeToDuplicate.current) {
-    console.error(`No ref found for frame ${keyToDuplicate}`);
-    return;
-  }
-  setNewFrameContent(frameToDuplicate.current.value);
-  setNewFrameTime(timeToDuplicate.current.value);
-  newFrame(frameToDuplicate.current, timeToDuplicate.current);
-};
+  const duplicateFrame = (keyToDuplicate) => {
+    const frameToDuplicate = frameRefs.current.find((ref, index) => frames[index] === keyToDuplicate);
+    const timeToDuplicate = frameTimes.current.find((ref, index) => frames[index] === keyToDuplicate);
+    if (!frameToDuplicate || !frameToDuplicate.current || !timeToDuplicate || !timeToDuplicate.current) {
+      console.error(`No ref found for frame ${keyToDuplicate}`);
+      return;
+    }
+    setNewFrameContent(frameToDuplicate.current.value);
+    setNewFrameTime(timeToDuplicate.current.value);
+    newFrame(frameToDuplicate.current, timeToDuplicate.current);
+  };
 
-useEffect(() => {
-  if (newFrameContent !== '' && frameRefs.current.length > 0) {
-    const newFrameRef = frameRefs.current[frameRefs.current.length - 1];
-    if (newFrameRef && newFrameRef.current) {
-      newFrameRef.current.value = newFrameContent;
+  useEffect(() => {
+    if (newFrameContent !== '' && frameRefs.current.length > 0) {
+      const newFrameRef = frameRefs.current[frameRefs.current.length - 1];
+      if (newFrameRef && newFrameRef.current) {
+        newFrameRef.current.value = newFrameContent;
+      }
     }
-  }
-  if (newFrameTime !== '' && frameTimes.current.length > 0) {
-    const newTimeRef = frameTimes.current[frameTimes.current.length - 1];
-    if (newTimeRef && newTimeRef.current) {
-      newTimeRef.current.value = newFrameTime;
+    if (newFrameTime !== '' && frameTimes.current.length > 0) {
+      const newTimeRef = frameTimes.current[frameTimes.current.length - 1];
+      if (newTimeRef && newTimeRef.current) {
+        newTimeRef.current.value = newFrameTime;
+      }
     }
-  }
-}, [newFrameContent, newFrameTime]);
+  }, [newFrameContent, newFrameTime]);
 
   //数据帧的删除
   const handleDeleteFrame = (keyToDelete) => {
@@ -197,53 +200,22 @@ useEffect(() => {
         <div className='text-xl font-medium pb-2'>DataFrame Editor</div>
         <div className='pb-2 overflow-y-auto h-[80%] w-[95%] md:w-[98%] md:h-[calc(100vh-140px)] mx-[auto]'>
           {frames.map((key, index) => (
-            <div key={key} className='w-full bg-zinc-600 p-4 mb-4 transition rounded-lg block'>
-              <div className='py-2 grid grid-cols-12'>
-                <div className='col-span-11'>
-                  <div className='text-lg md:text-xl font-bold pb-2'>DataFrame Key: {key} / Index: {index}</div>
-                  <div>
-                    Time <input ref={frameTimes.current[index]} className='bg-zinc-800 p-2 ml-2 rounded-lg'></input>
-                  </div>
-                </div>
-                <div className='col-span-1 grid grid-rows-2 gap-1 pb-4'>
-                  <button onClick={() => handleMoveUp(key)} className='bg-zinc-500 rounded-lg text-sm'>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 m-[auto]">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
-                    </svg>
-                  </button>
-                  <button onClick={() => handleMoveDown(key)} className='bg-zinc-500 rounded-lg text-sm'>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 m-[auto]">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              {/* 编辑器显示/隐藏按钮 */}
-              <div className='grid grid-cols-2 gap-4'>
-                <button onClick={() => toggleTextarea(key)} className="bg-zinc-500 rounded-lg py-2 w-full">
-                  Code Editor
-                </button>
-                <button onClick={() => toggleNewEditor(key)} className="bg-zinc-500 rounded-lg py-2 w-full">
-                  Neo Editor
-                </button>
-              </div>
-              {/* 代码编辑器 */}
-              <textarea
-                ref={frameRefs.current[index]}
-                className='w-full h-48 p-2 my-2 rounded-lg bg-zinc-800'
-                style={{ display: textareaVisibility[key] ? 'none' : 'block' }}
-              />
-              {/* 可视化编辑器 */}
-              <div
-                className='w-full p-2 my-2 '
-                style={{ display: NeoEditVisibility[key] ? 'block' : 'none' }}>Neo Editor (Codeing……) </div>
-              <div className='mt-4 flex gap-2'>
-                <button onClick={() => preivewFrame(key)} className='flex-1 py-1 px-2 text-sm  border-2 rounded-lg'>Preivew</button>
-                <button onClick={() => duplicateFrame(key)} className='flex-1 py-1 px-2 text-sm  border-2 rounded-lg'>Duplicate</button>
-                <button onClick={() => handleDeleteFrame(key)} className='py-1 px-2 text-sm text-red-400 border-red-500 border-2 rounded-lg float-right'>Delete</button>
-              </div>
-
-            </div>
+            <NeoFrameEditor
+              key={key}
+              frameKey={key}
+              index={index}
+              handleMoveUp={handleMoveUp}
+              handleMoveDown={handleMoveDown}
+              toggleTextarea={toggleTextarea}
+              toggleNewEditor={toggleNewEditor}
+              textareaVisibility={textareaVisibility}
+              NeoEditVisibility={NeoEditVisibility}
+              preivewFrame={preivewFrame}
+              duplicateFrame={duplicateFrame}
+              handleDeleteFrame={handleDeleteFrame}
+              frameTimes={frameTimes}
+              frameRefs={frameRefs}
+            />
           ))}
         </div>
         <div id='EditFloatButton' className='grid grid-cols-2 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
