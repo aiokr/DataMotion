@@ -7,9 +7,10 @@ import EChartsComponent from './components/EChartsComponent';
 import NeoFrameEditor from './components/NeoFrameEditor';
 import barTemplate from './components/echartOpt/bar.json';
 import lineTemplate from './components/echartOpt/line.json';
+import pieTemplate from './components/echartOpt/pie.json';
 
 const chartModeList = [
-  'bar', 'line', 'smoothLine', 'pie'
+  'bar', 'line', 'smoothLine', 'pie', 'Others'
 ]
 
 export function HomePage() {
@@ -56,7 +57,7 @@ export function HomePage() {
         return chartMode.toLowerCase().includes(query.toLowerCase())
       })
 
-  // Reload 按钮，播放当前完整的图表动画
+  // Play 按钮，播放当前完整的图表动画
   const handleClick = () => {
     console.log('Reload ECharts');
     let i = 0;
@@ -114,7 +115,6 @@ export function HomePage() {
 
   // 带有参数的新建数据帧
   const newFrame = (frameContent = '', frameTime = '') => {
-    console.log(frameContent, frameTime)
     setFrameCount(prevCount => prevCount + 1); // 每次添加一个新元素时，都增加计数器的值
     setFrames(prevFrames => [...prevFrames, frameCount]); // 使用计数器的值作为新元素的key
     const newFrameRef = createRef();
@@ -127,16 +127,19 @@ export function HomePage() {
 
   // 根据模板新建关键帧
   const newTemplateFrame = () => {
-    //console.log('Now Chart Mode is ' + chartMode)
-    
+    console.log('Now Chart Mode is ' + chartMode)
     if (chartMode == 'bar') { // 新建柱状图
-      const barTemplateString = JSON.stringify(barTemplate, null, 2);
+      const barTemplateString = JSON.stringify(barTemplate, null, 5);
       newFrame(barTemplateString, 5);
     } else if (chartMode == 'line') { // 新建折线图
-      const lineTemplateString = JSON.stringify(lineTemplate, null, 2);
+      const lineTemplateString = JSON.stringify(lineTemplate, null, 5);
       newFrame(lineTemplateString, 5);
+    } else if (chartMode == 'pie') { // 新建饼图
+      const pieTemplateString = JSON.stringify(pieTemplate, null, 5);
+      newFrame(pieTemplateString, 5);
     } else {
-      newFrame('There is no template for this type', 5);}
+      newFrame('There is no template for this type', 5);
+    }
   }
 
   // 数据帧的复制
@@ -234,13 +237,13 @@ export function HomePage() {
 
   return (
     <main className="grid grid-cols-none grid-rows-6 md:grid-rows-none md:grid-cols-12 h-screen w-screen gap-6 p-6 bg-zinc-800 text-zinc-100">
-      <div className='row-span-2 md:col-span-6'>
+      <div className='row-span-2 md:col-span-7'>
         <div className='text-xl font-medium pb-2'>Chart Area</div>
         <section id='ChartArea' className='aspect-video bg-white p-2 w-[95%] my-0 mx-[auto] md:w-full'>
           <EChartsComponent option={option} onChartReady={chart => chartRef.current = chart} />
         </section>
-        <div className='grid grid-cols-3 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
-          <button onClick={handleClick} className='px-1 md:p-2 flex flex-col items-center border rounded-full'>Reload</button>
+        <div className='flex flex-row gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
+          <button onClick={handleClick} className='py-1 px-2 text-md text-main border-main border-2 rounded-lg'>Play DataMotion</button>
         </div>
         <div className='flex gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
           <div>
@@ -257,7 +260,7 @@ export function HomePage() {
           </div>
         </div>
       </div>
-      <section id="EditArea" className='row-span-4 md:col-span-6'>
+      <section id="EditArea" className='row-span-4 md:col-span-5'>
         <div className='text-xl font-medium pb-2'>DataFrame Editor</div>
         <div className='pb-2 overflow-y-auto h-[80%] w-[95%] md:w-full md:h-[calc(100vh-140px)] mx-[auto]'>
           {frames.map((key, index) => (
