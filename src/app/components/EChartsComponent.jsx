@@ -7,7 +7,7 @@ export default function EChartsComponent({ width, height, option, onChartReady }
   const chartRef = useRef(null);
 
   useEffect(() => {
-    const chartInstance = echarts.init(chartRef.current);
+    const chartInstance = echarts.init(chartRef.current, null, { renderer: 'canvas' });;
     chartInstance.setOption(option);
 
     // 调用 onChartReady 函数，并将图表实例作为参数传递

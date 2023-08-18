@@ -1,24 +1,22 @@
 import { useState, useRef, useEffect, createRef } from 'react';
-const DataFrameEditor = ({ key, frameKey, index, handleMoveUp, handleMoveDown, toggleTextarea, toggleNewEditor, textareaVisibility, NeoEditVisibility, preivewFrame, duplicateFrame, handleDeleteFrame, frameTimes, frameRefs }) => {
-  const frameTimeRef = useRef(null);
+const DataFrameEditor = ({ frameKey, index, handleMoveUp, handleMoveDown, toggleTextarea, toggleNewEditor, textareaVisibility, NeoEditVisibility, preivewFrame, duplicateFrame, handleDeleteFrame, frameTimes, frameRefs }) => {
   return (
     <div className='w-full bg-zinc-600 p-4 mb-4 transition rounded-lg block'>
       <div className='py-2 grid grid-cols-12'>
         <div className='col-span-11'>
           <div className='text-lg md:text-xl font-bold pb-2'>DataFrame Key: {frameKey} / Index: {index}</div>
           <div>
-            Time <input ref={frameTimes.current[index]} className='bg-zinc-800 p-2 ml-2 rounded-lg'></input>
-          </div>
+            Time <input ref={frameTimes.current[index]} defaultValue={frameTimes.current[index].current} className='bg-zinc-800 p-2 ml-2 rounded-lg'></input>          </div>
         </div>
         <div className='col-span-1 grid grid-rows-2 gap-1 pb-4'>
           <button onClick={() => handleMoveUp(frameKey)} className='bg-zinc-500 rounded-lg text-sm'>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 m-[auto]">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 m-[auto]">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
             </svg>
           </button>
           <button onClick={() => handleMoveDown(frameKey)} className='bg-zinc-500 rounded-lg text-sm'>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 m-[auto]">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 m-[auto]">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
             </svg>
           </button>
         </div>
@@ -35,6 +33,7 @@ const DataFrameEditor = ({ key, frameKey, index, handleMoveUp, handleMoveDown, t
       {/* 代码编辑器 */}
       <textarea
         ref={frameRefs.current[index]}
+        defaultValue={frameRefs.current[index].current}
         className='w-full h-48 p-2 my-2 rounded-lg bg-zinc-800'
         style={{ display: textareaVisibility[frameKey] ? 'none' : 'block' }}
       />

@@ -1,5 +1,6 @@
 "use client"
 
+import React from 'react';
 import { useState, useRef, useEffect, createRef } from 'react';
 import EChartsComponent from './components/EChartsComponent';
 import NeoFrameEditor from './components/NeoFrameEditor';
@@ -89,14 +90,20 @@ export function HomePage() {
     setFrames(prevFrames => [...prevFrames, frameCount]); // 使用计数器的值作为新元素的key
     frameRefs.current.push(createRef()); // 为新的frame创建一个新的引用，并将其添加到frameRefs数组中
     frameTimes.current.push(createRef()); // 为新的frame创建一个新的引用，并将其添加到frameTimes数组中
+    console.log(frameRefs.current, frameTimes.current)
   };
 
   //带有参数的数据帧的增加
   const newFrame = (frameContent = '', frameTime = '') => {
+    console.log(frameContent, frameTime)
     setFrameCount(prevCount => prevCount + 1); // 每次添加一个新元素时，都增加计数器的值
     setFrames(prevFrames => [...prevFrames, frameCount]); // 使用计数器的值作为新元素的key
-    frameRefs.current.push(frameContent); // 将frameContent添加到frameRefs数组中
-    frameTimes.current.push(frameTime); // 将frameTime添加到frameTimes数组中
+    const newFrameRef = createRef();
+    newFrameRef.current = frameContent;
+    frameRefs.current.push(newFrameRef); // 将newFrameRef添加到frameRefs数组中
+    const newTimeRef = createRef();
+    newTimeRef.current = frameTime;
+    frameTimes.current.push(newTimeRef); // 将newTimeRef添加到frameTimes数组中
   };
 
   //数据帧的复制
@@ -107,9 +114,13 @@ export function HomePage() {
       console.error(`No ref found for frame ${keyToDuplicate}`);
       return;
     }
-    setNewFrameContent(frameToDuplicate.current.value);
-    setNewFrameTime(timeToDuplicate.current.value);
-    newFrame(frameToDuplicate.current, timeToDuplicate.current);
+    const newFrameContent = frameToDuplicate.current.value;
+    const newFrameTime = timeToDuplicate.current.value;
+    if (newFrameContent === '' || newFrameTime === '') {
+      console.error('time or frameCode is empty')
+      return;
+    }
+    newFrame(newFrameContent, newFrameTime);
   };
 
   useEffect(() => {
