@@ -1,0 +1,32 @@
+{
+  "xAxis": {
+    "type": "category",
+    "data": [
+      "甲",
+      "乙",
+      "丙",
+      "丁",
+      "戍",
+      "己",
+      "庚"
+    ]
+  },
+  "yAxis": {
+    "type": "value"
+  },
+  "series": [
+    {
+      "data": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "type": "line",
+      "smooth": false
+    }
+  ]
+}

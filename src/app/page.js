@@ -2,8 +2,15 @@
 
 import React from 'react';
 import { useState, useRef, useEffect, createRef } from 'react';
+import { Combobox } from '@headlessui/react'
 import EChartsComponent from './components/EChartsComponent';
 import NeoFrameEditor from './components/NeoFrameEditor';
+import barTemplate from './components/echartOpt/bar.json';
+import lineTemplate from './components/echartOpt/line.json';
+
+const chartModeList = [
+  'bar', 'line', 'smoothLine', 'pie'
+]
 
 export function HomePage() {
 
@@ -30,16 +37,26 @@ export function HomePage() {
   });
 
   const chartRef = useRef(null);// 使用useRef Hook创建一个引用，用于存储图表实例
-  const [frameCount, setFrameCount] = useState(0); // 使用一个计数器来生成唯一的key
-  const [frames, setFrames] = useState([]); // 新增状态变量frames
-  const frameRefs = useRef([]);// 使用useRef Hook创建一个引用，用于存储所有代码编辑器的引用
-  const frameTimes = useRef([]);// 使用useRef Hook创建一个引用，用于存储持续时间的引用
-  const [textareaVisibility, setTextareaVisibility] = useState({}); // 新增状态变量textareaVisibility
-  const [NeoEditVisibility, setNeoEditVisibility] = useState({}); // 新增状态变量NeoEditVisibility
-  const [newFrameContent, setNewFrameContent] = useState(''); // 
-  const [newFrameTime, setNewFrameTime] = useState(''); //
+  const frameRefs = useRef([]); // 引用变量 frameRefs 是每一个 Dataframe 的主代码的内容
+  const frameTimes = useRef([]);// 引用变量 frameTimes 是每一个 Dataframe 的持续时间
 
-  // 定义一个函数，用于处理点击Reload按钮的事件
+  const [frameCount, setFrameCount] = useState(0); // 使用一个计数器来生成 Dataframe 的唯一 key
+  const [frames, setFrames] = useState([]); // 新增状态变量frames
+  const [textareaVisibility, setTextareaVisibility] = useState({}); // 状态变量 textareaVisibility 用于记录代码编辑器的显示状态
+  const [NeoEditVisibility, setNeoEditVisibility] = useState({}); // 状态变量 NeoEditVisibility 用于记录可视化编辑器的显示状态
+  const [newFrameContent, setNewFrameContent] = useState(''); // 状态变量 newFrameContent
+  const [newFrameTime, setNewFrameTime] = useState(''); // 状态变量 newFrameTime
+  const [chartMode, setChartMode] = useState(chartModeList[0]); //状态变量 chartMode 用于记录当前的图表模式
+  const [query, setQuery] = useState('')
+
+  const filteredChartMode =
+    query === ''
+      ? chartModeList
+      : chartModeList.filter((chartMode) => {
+        return chartMode.toLowerCase().includes(query.toLowerCase())
+      })
+
+  // Reload 按钮，播放当前完整的图表动画
   const handleClick = () => {
     console.log('Reload ECharts');
     let i = 0;
@@ -56,10 +73,11 @@ export function HomePage() {
         return;
       }
       try {
-        const newOption = eval(`(${frameRef.current.value})`);
-        chartRef.current.setOption(newOption, true);
+        var option;
+        eval(`option = ${frameRef.current.value}`);
+        chartRef.current.setOption(option, true);
       } catch (error) {
-        console.error('Invalid option:', error);
+        console.error('Invalid option', error);
       }
       i++;
       // 持续时间
@@ -68,7 +86,7 @@ export function HomePage() {
     loadNextFrame();
   };
 
-  // 数据帧预览
+  // 预览这一数据帧
   const preivewFrame = (keyToPreview) => {
     console.log(keyToPreview, frameRefs)
     const frameRef = frameRefs.current.find((ref, index) => frames[index] === keyToPreview);
@@ -77,14 +95,15 @@ export function HomePage() {
       return;
     }
     try {
-      const newOption = eval(`(${frameRef.current.value})`);
-      chartRef.current.setOption(newOption, true);
+      var option
+      eval(`option = ${frameRef.current.value}`);
+      chartRef.current.setOption(option, true);
     } catch (error) {
       console.error('Invalid option:', error);
     }
   };
 
-  //数据帧的增加
+  // 新建空白数据帧
   const handleNewFrame = () => {
     setFrameCount(prevCount => prevCount + 1); // 每次添加一个新元素时，都增加计数器的值
     setFrames(prevFrames => [...prevFrames, frameCount]); // 使用计数器的值作为新元素的key
@@ -93,7 +112,7 @@ export function HomePage() {
     console.log(frameRefs.current, frameTimes.current)
   };
 
-  //带有参数的数据帧的增加
+  // 带有参数的新建数据帧
   const newFrame = (frameContent = '', frameTime = '') => {
     console.log(frameContent, frameTime)
     setFrameCount(prevCount => prevCount + 1); // 每次添加一个新元素时，都增加计数器的值
@@ -106,16 +125,32 @@ export function HomePage() {
     frameTimes.current.push(newTimeRef); // 将newTimeRef添加到frameTimes数组中
   };
 
-  //数据帧的复制
+  // 根据模板新建关键帧
+  const newTemplateFrame = () => {
+    //console.log('Now Chart Mode is ' + chartMode)
+    
+    if (chartMode == 'bar') { // 新建柱状图
+      const barTemplateString = JSON.stringify(barTemplate, null, 2);
+      newFrame(barTemplateString, 5);
+    } else if (chartMode == 'line') { // 新建折线图
+      const lineTemplateString = JSON.stringify(lineTemplate, null, 2);
+      newFrame(lineTemplateString, 5);
+    } else {
+      newFrame('There is no template for this type', 5);}
+  }
+
+  // 数据帧的复制
   const duplicateFrame = (keyToDuplicate) => {
-    const frameToDuplicate = frameRefs.current.find((ref, index) => frames[index] === keyToDuplicate);
-    const timeToDuplicate = frameTimes.current.find((ref, index) => frames[index] === keyToDuplicate);
+    const frameToDuplicate = frameRefs.current.find((ref, index) => frames[index] === keyToDuplicate); // 找到要复制的数据帧的代码内容
+    const timeToDuplicate = frameTimes.current.find((ref, index) => frames[index] === keyToDuplicate); // 找到要复制的数据帧的持续时间
     if (!frameToDuplicate || !frameToDuplicate.current || !timeToDuplicate || !timeToDuplicate.current) {
       console.error(`No ref found for frame ${keyToDuplicate}`);
       return;
     }
     const newFrameContent = frameToDuplicate.current.value;
     const newFrameTime = timeToDuplicate.current.value;
+
+    // 判断数据的代码、持续时间是否为空
     if (newFrameContent === '' || newFrameTime === '') {
       console.error('time or frameCode is empty')
       return;
@@ -127,25 +162,25 @@ export function HomePage() {
     if (newFrameContent !== '' && frameRefs.current.length > 0) {
       const newFrameRef = frameRefs.current[frameRefs.current.length - 1];
       if (newFrameRef && newFrameRef.current) {
-        newFrameRef.current.value = newFrameContent;
+        newFrameRef.current.value = newFrameContent; // 将被复制的数据帧的代码赋值给最后一个数据帧
       }
     }
     if (newFrameTime !== '' && frameTimes.current.length > 0) {
       const newTimeRef = frameTimes.current[frameTimes.current.length - 1];
       if (newTimeRef && newTimeRef.current) {
-        newTimeRef.current.value = newFrameTime;
+        newTimeRef.current.value = newFrameTime; // 将被复制的数据帧的持续时间赋值给最后一个数据帧
       }
     }
   }, [newFrameContent, newFrameTime]);
 
-  //数据帧的删除
+  // 数据帧的删除
   const handleDeleteFrame = (keyToDelete) => {
     setFrames(prevFrames => prevFrames.filter(key => key !== keyToDelete));
     const indexToDelete = frameRefs.current.findIndex((ref, index) => frames[index] === keyToDelete);
     frameRefs.current.splice(indexToDelete, 1);
   };
 
-  //数据帧的移动（编辑顺序）
+  // 数据帧的上移
   const handleMoveUp = (key) => {
     setFrames(prevFrames => {
       const frameIndex = prevFrames.findIndex(frame => frame === key);
@@ -160,6 +195,7 @@ export function HomePage() {
     });
   };
 
+  // 数据帧的下移
   const handleMoveDown = (key) => {
     setFrames(prevFrames => {
       const frameIndex = prevFrames.findIndex(frame => frame === key);
@@ -174,7 +210,7 @@ export function HomePage() {
     });
   };
 
-  // 新增一个函数，用于切换指定key的 代码编辑器 的显示/隐藏状态
+  // 切换指定key的 代码编辑器 的显示/隐藏状态
   const toggleTextarea = (key) => {
     setTextareaVisibility(prevState => ({
       ...prevState,
@@ -182,7 +218,7 @@ export function HomePage() {
     }));
   };
 
-  // 新增一个函数，用于切换指定key的 可视化编辑器 的显示/隐藏状态
+  // 切换指定key的 可视化编辑器 的显示/隐藏状态
   const toggleNewEditor = (key) => {
     setNeoEditVisibility(prevState => ({
       ...prevState,
@@ -206,14 +242,28 @@ export function HomePage() {
         <div className='grid grid-cols-3 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
           <button onClick={handleClick} className='px-1 md:p-2 flex flex-col items-center border rounded-full'>Reload</button>
         </div>
+        <div className='flex gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
+          <div>
+            <Combobox value={chartMode} onChange={setChartMode}>
+              <Combobox.Input onChange={(event) => setQuery(event.target.value)} className='bg-zinc-800 py-1 border text-center rounded-lg w-20' />
+              <Combobox.Options className='bg-zinc-800 mt-2 py-1 border text-center rounded-lg w-20'>
+                {filteredChartMode.map((chartMode) => (
+                  <Combobox.Option key={chartMode} value={chartMode}>
+                    {chartMode}
+                  </Combobox.Option>
+                ))}
+              </Combobox.Options>
+            </Combobox>
+          </div>
+        </div>
       </div>
       <section id="EditArea" className='row-span-4 md:col-span-6'>
         <div className='text-xl font-medium pb-2'>DataFrame Editor</div>
-        <div className='pb-2 overflow-y-auto h-[80%] w-[95%] md:w-[98%] md:h-[calc(100vh-140px)] mx-[auto]'>
+        <div className='pb-2 overflow-y-auto h-[80%] w-[95%] md:w-full md:h-[calc(100vh-140px)] mx-[auto]'>
           {frames.map((key, index) => (
             <NeoFrameEditor
-              key={key}
-              frameKey={key}
+              key={key}      // key 无法作为 props 传递到子组件
+              frameKey={key} // 因此设立一个 frameKey 作为 key
               index={index}
               handleMoveUp={handleMoveUp}
               handleMoveDown={handleMoveDown}
@@ -226,11 +276,13 @@ export function HomePage() {
               handleDeleteFrame={handleDeleteFrame}
               frameTimes={frameTimes}
               frameRefs={frameRefs}
+              chartMode={chartMode} // chartMode 用于记录当前的图表模式
             />
           ))}
         </div>
         <div id='EditFloatButton' className='grid grid-cols-2 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
-          <button onClick={handleNewFrame} className='px-1 md:p-2 flex flex-col items-center border rounded-full'>New DataFrame</button>
+          <button onClick={handleNewFrame} className='px-1 md:p-2 flex flex-col items-center border rounded-full'>New Blank DataFrame</button>
+          <button onClick={newTemplateFrame} className='px-1 md:p-2 flex flex-col items-center border rounded-full'>New Template DataFrame</button>
         </div>
       </section>
     </main >

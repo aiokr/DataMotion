@@ -1,12 +1,84 @@
 import { useState, useRef, useEffect, createRef } from 'react';
-const DataFrameEditor = ({ frameKey, index, handleMoveUp, handleMoveDown, toggleTextarea, toggleNewEditor, textareaVisibility, NeoEditVisibility, preivewFrame, duplicateFrame, handleDeleteFrame, frameTimes, frameRefs }) => {
+
+
+
+const DataFrameEditor = ({ frameKey, index, handleMoveUp, handleMoveDown, toggleTextarea, toggleNewEditor, textareaVisibility, NeoEditVisibility, preivewFrame, duplicateFrame, handleDeleteFrame, frameTimes, frameRefs, chartMode }) => {
+
+  const [dataFrameNum, setDataFrameNum] = useState(null);
+  const [dataFrameType, setDataFrameType] = useState(null);
+
+  // 获取数据帧输入，并格式化和解析
+  const getDataFrame = () => {
+    try {
+      const optionRawText = frameRefs.current[index].current.value; // 获取数据帧的代码
+      const time = frameTimes.current[index].current.value; // 获取数据帧的持续时间代码
+      const optionJsCode = eval('(' + optionRawText + ')'); // 解析数据帧的代码
+      let optionTextJson = JSON.stringify(optionJsCode, null, 2);  // 将数据帧的代码转换为 JSON 格式
+      let optionStatus = JSON.parse(optionTextJson); // 解析 JSON 格式的数据帧为 JS 对象
+
+      if (optionStatus.series[0].data !== null) {
+        setDataFrameNum(optionStatus.series[0].data);
+      }
+      if (optionStatus.series[0].type !== null) {
+        setDataFrameType(optionStatus.series[0].type);
+      }
+
+      const newOptionTextJson = JSON.stringify(optionStatus, null, 2); // 将 JS 对象转换为 JSON 格式
+      frameRefs.current[index].current.value = newOptionTextJson; // 回输数据帧的代码
+
+    } catch (error) {
+      // 这里可以处理错误，例如显示一条错误消息
+      console.error('An error occurred:', error);
+    }
+  }
+
+  // 监听 chartMode 的变化，并调用 changeDataFrameType 修改 series[0].type
+  useEffect(() => {
+    changeDataFrameType();
+  }, [chartMode]);
+
+  const changeDataFrameType = () => {
+    try {
+      const optionRawText = frameRefs.current[index].current.value; // 获取数据帧的代码
+      const optionJsCode = eval('(' + optionRawText + ')'); // 解析数据帧的代码
+      let optionTextJson = JSON.stringify(optionJsCode, null, 2);  // 将数据帧的代码转换为 JSON 格式
+      let optionStatus = JSON.parse(optionTextJson); // 解析 JSON 格式的数据帧为 JS 对象
+      // 当 chartMode 改变时，自动改变 series 的 type
+      if (chartMode !== dataFrameType) {
+
+        if (chartMode == 'line') {
+          optionStatus.series[0].type = 'line'
+          optionStatus.series[0].smooth = false;
+        }
+
+        if (chartMode == 'smoothLine') {
+          optionStatus.series[0].type = 'line'
+          optionStatus.series[0].smooth = true;
+        }
+
+        if (chartMode == 'bar') {
+          optionStatus.series[0].type = 'bar'
+          delete optionStatus.series[0].smooth;
+        }
+
+        //optionStatus.series[0].type = chartMode;
+        setDataFrameType(chartMode);
+        const newOptionTextJson = JSON.stringify(optionStatus, null, 2); // 将 JS 对象转换为 JSON 格式
+        frameRefs.current[index].current.value = newOptionTextJson; // 回输数据帧的代码
+      }
+    } catch (error) {
+      // 这里可以处理错误，例如显示一条错误消息
+      console.error('An error occurred:', error);
+    }
+  }
+
   return (
-    <div className='w-full bg-zinc-600 p-4 mb-4 transition rounded-lg block'>
-      <div className='py-2 grid grid-cols-12'>
+    <div className='w-full bg-zinc-600 px-4 py-3 mb-5 transition rounded-lg block'>
+      <div className='grid grid-cols-12 pb-2'>
         <div className='col-span-11'>
-          <div className='text-lg md:text-xl font-bold pb-2'>DataFrame Key: {frameKey} / Index: {index}</div>
+          <div className='text-md md:text-lg font-bold pb-2'>DataFrame Key: {frameKey} / Index: {index}</div>
           <div>
-            Time <input ref={frameTimes.current[index]} defaultValue={frameTimes.current[index].current} className='bg-zinc-800 p-2 ml-2 rounded-lg'></input>          </div>
+            Duration Seconds <input ref={frameTimes.current[index]} defaultValue={frameTimes.current[index].current} onBlur={getDataFrame} className='border-2 border-zinc-700 bg-zinc-600 mx-2 px-2 py-1 w-12  text-center rounded-lg text-sm'></input></div>
         </div>
         <div className='col-span-1 grid grid-rows-2 gap-1 pb-4'>
           <button onClick={() => handleMoveUp(frameKey)} className='bg-zinc-500 rounded-lg text-sm'>
@@ -22,28 +94,31 @@ const DataFrameEditor = ({ frameKey, index, handleMoveUp, handleMoveDown, toggle
         </div>
       </div>
       {/* 编辑器显示/隐藏按钮 */}
-      <div className='grid grid-cols-2 gap-4'>
-        <button onClick={() => toggleTextarea(frameKey)} className="bg-zinc-500 rounded-lg py-2 w-full">
+      <div className='mt-4 flex gap-2'>
+        <button onClick={() => toggleTextarea(frameKey)} className="flex-1 rounded-lg text-sm py-1 border-2 border-zinc-700">
           Code Editor
         </button>
-        <button onClick={() => toggleNewEditor(frameKey)} className="bg-zinc-500 rounded-lg py-2 w-full">
+        <button onClick={() => toggleNewEditor(frameKey)} className="flex-1 rounded-lg text-sm py-1 border-2 border-zinc-700">
           Neo Editor
         </button>
       </div>
       {/* 代码编辑器 */}
       <textarea
-        ref={frameRefs.current[index]}
+        ref={frameRefs.current[index]} onBlur={getDataFrame}
         defaultValue={frameRefs.current[index].current}
-        className='w-full h-48 p-2 my-2 rounded-lg bg-zinc-800'
+        className='w-full h-48 p-2 my-2 rounded-lg bg-zinc-800 focus:outline-main'
         style={{ display: textareaVisibility[frameKey] ? 'none' : 'block' }}
       />
       {/* 可视化编辑器 */}
       <div
-        className='w-full p-2 my-2 '
-        style={{ display: NeoEditVisibility[frameKey] ? 'block' : 'none' }}>Neo Editor (Codeing……) </div>
-      <div className='mt-4 flex gap-2'>
-        <button onClick={() => preivewFrame(frameKey)} className='flex-1 py-1 px-2 text-sm  border-2 rounded-lg'>Preivew</button>
-        <button onClick={() => duplicateFrame(frameKey)} className='flex-1 py-1 px-2 text-sm  border-2 rounded-lg'>Duplicate</button>
+        className='w-full p-2 my-2 rounded-lg border-2 border-main'
+        style={{ display: NeoEditVisibility[frameKey] ? 'block' : 'none' }}>
+        Neo Editor (Codeing……)
+        {dataFrameNum}
+      </div>
+      <div className='mt-2 flex gap-2'>
+        <button onClick={() => preivewFrame(frameKey)} className='flex-1 py-1 px-2 text-sm border-2 border-zinc-700 rounded-lg'>Preivew</button>
+        <button onClick={() => duplicateFrame(frameKey)} className='flex-1 py-1 px-2 text-sm  border-2 border-zinc-700 rounded-lg'>Duplicate</button>
         <button onClick={() => handleDeleteFrame(frameKey)} className='py-1 px-2 text-sm text-red-400 border-red-500 border-2 rounded-lg float-right'>Delete</button>
       </div>
     </div>
