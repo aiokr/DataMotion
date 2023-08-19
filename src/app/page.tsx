@@ -1,7 +1,6 @@
 "use client"
 
-import React from 'react';
-import { useState, useRef, useEffect, createRef } from 'react';
+import React, { useState, useRef, useEffect, createRef, RefObject } from 'react';
 import { Combobox } from '@headlessui/react'
 import EChartsComponent from './components/EChartsComponent';
 import NeoFrameEditor from './components/FrameEditor';
@@ -10,11 +9,17 @@ import barTemplate from './components/echartOpt/bar.json';
 import lineTemplate from './components/echartOpt/line.json';
 import pieTemplate from './components/echartOpt/pie.json';
 
-const chartModeList = [
+const chartModeList: string[] = [
   'Bar', 'Line', 'SmoothLine', 'Pie', 'Customize'
 ]
 
-export default function HomePage() {
+interface FrameMotionMainPage {
+  frameTime: number;
+  frameRefs: RefObject<HTMLTextAreaElement>[];
+}
+
+
+const HomePage: React.FC<FrameMotionMainPage> = () => {
 
   //默认图谱
   const [option] = useState({
@@ -38,18 +43,16 @@ export default function HomePage() {
     ]
   });
 
-  const chartRef = useRef(null);// 使用useRef Hook创建一个引用，用于存储图表实例
-  const frameRefs = useRef([]); // 引用变量 frameRefs 是每一个 Dataframe 的主代码的内容
-  const frameTimes = useRef([]);// 引用变量 frameTimes 是每一个 Dataframe 的持续时间
+  const chartRef = useRef<echarts.ECharts | null>(null);
+  const [frameCount, setFrameCount] = useState<number>(0);
+  const [frames, setFrames] = useState<number[]>([]);
+  const [textareaVisibility, setTextareaVisibility] = useState<Record<number, boolean>>({});
+  const [NeoEditVisibility, setNeoEditVisibility] = useState<Record<number, boolean>>({});
+  const [newFrameContent, setNewFrameContent] = useState<string>('');
+  const [newFrameTime, setNewFrameTime] = useState<number>(0);
+  const [chartMode, setChartMode] = useState<string>(chartModeList[0]);
+  const [query, setQuery] = useState<string>('')
 
-  const [frameCount, setFrameCount] = useState(0); // 使用一个计数器来生成 Dataframe 的唯一 key
-  const [frames, setFrames] = useState([]); // 新增状态变量frames
-  const [textareaVisibility, setTextareaVisibility] = useState({}); // 状态变量 textareaVisibility 用于记录代码编辑器的显示状态
-  const [NeoEditVisibility, setNeoEditVisibility] = useState({}); // 状态变量 NeoEditVisibility 用于记录可视化编辑器的显示状态
-  const [newFrameContent, setNewFrameContent] = useState(''); // 状态变量 newFrameContent
-  const [newFrameTime, setNewFrameTime] = useState(''); // 状态变量 newFrameTime
-  const [chartMode, setChartMode] = useState(chartModeList[0]); //状态变量 chartMode 用于记录当前的图表模式
-  const [query, setQuery] = useState('')
 
   const filteredChartMode =
     query === ''
@@ -69,8 +72,8 @@ export default function HomePage() {
       }
       const key = frames[i];
       const frameRef = frameRefs.current.find((ref, index) => frames[index] === key);
-      const frameTime = frameTimes.current.find((ref, index) => frames[index] === key);
-      if (!frameRef || !frameRef.current || !frameTime || !frameTime.current) {
+      const frameTimeRef = frameTimeRefs.current.find((ref, index) => frames[index] === key);
+      if (!frameRef || !frameRef.current || !frameTimeRef || !frameTimeRefs.current) {
         console.error(`No ref found for frame ${key}`);
         return;
       }
@@ -83,7 +86,7 @@ export default function HomePage() {
       }
       i++;
       // 持续时间
-      setTimeout(loadNextFrame, Number(frameTime.current.value) * 1000);
+setTimeout(loadNextFrame, Number(frameTimeRef.current) * 1000);
     };
     loadNextFrame();
   };
@@ -110,78 +113,76 @@ export default function HomePage() {
     setFrameCount(prevCount => prevCount + 1); // 每次添加一个新元素时，都增加计数器的值
     setFrames(prevFrames => [...prevFrames, frameCount]); // 使用计数器的值作为新元素的key
     frameRefs.current.push(createRef()); // 为新的frame创建一个新的引用，并将其添加到frameRefs数组中
-    frameTimes.current.push(createRef()); // 为新的frame创建一个新的引用，并将其添加到frameTimes数组中
-    console.log(frameRefs.current, frameTimes.current)
+    frameTimeRefs.current.push(createRef()); // 为新的frame创建一个新的引用，并将其添加到frameTimes数组中
+    console.log(frameRefs.current, frameTimeRefs.current)
   };
 
+  const frameRefs = useRef<React.RefObject<string>[]>([]);
+  const frameTimeRefs = useRef<React.RefObject<number>[]>([]);
+  const newFrameRef = useRef<string | null>(null);
+  const newTimeRef = useRef<number | null>(null);
+
   // 带有参数的新建数据帧
-  const newFrame = (frameContent = '', frameTime = '') => {
-    setFrameCount(prevCount => prevCount + 1); // 每次添加一个新元素时，都增加计数器的值
-    setFrames(prevFrames => [...prevFrames, frameCount]); // 使用计数器的值作为新元素的key
-    const newFrameRef = createRef();
-    newFrameRef.current = frameContent;
-    frameRefs.current.push(newFrameRef); // 将newFrameRef添加到frameRefs数组中
-    const newTimeRef = createRef();
-    newTimeRef.current = frameTime;
-    frameTimes.current.push(newTimeRef); // 将newTimeRef添加到frameTimes数组中
+  const newFrame = (frameContent = '', frameTime: number) => {
+    const frameTimeAsNumber = Number(frameTime);
+    if (isNaN(frameTimeAsNumber)) {
+      console.error('frameTime is not a number:', frameTime);
+      return;
+    }
+
+    setFrameCount(prevCount => prevCount + 1);
+    setFrames(prevFrames => [...prevFrames, frameCount]);
+
+    // 更新ref
+    frameRefs.current.push({ current: frameContent });
+    frameTimeRefs.current.push({ current: frameTime });
+
+    console.log(frameContent, frameTime)
   };
 
   // 根据模板新建关键帧
   const newTemplateFrame = () => {
-    console.log('Now Chart Mode is ' + chartMode)
-    if (chartMode == 'Bar') { // 新建柱状图
-      const barTemplateString = JSON.stringify(barTemplate, null, 5);
-      newFrame(barTemplateString, 5);
-    } else if (chartMode == 'Line') { // 新建折线图
-      const lineTemplateString = JSON.stringify(lineTemplate, null, 5);
-      newFrame(lineTemplateString, 5);
-    } else if (chartMode == 'Pie') { // 新建饼图
-      const pieTemplateString = JSON.stringify(pieTemplate, null, 5);
-      newFrame(pieTemplateString, 5);
+    let templateContent;
+    if (chartMode === 'Bar') { // 新建柱状图
+      templateContent = JSON.stringify(barTemplate, null, 5);
+    } else if (chartMode === 'Line') { // 新建折线图
+      templateContent = JSON.stringify(lineTemplate, null, 5);
+    } else if (chartMode === 'Pie') { // 新建饼图
+      templateContent = JSON.stringify(pieTemplate, null, 5);
     } else {
-      newFrame('There is no template for this type', 5);
+      templateContent = 'There is no template for this type';
     }
+    newFrame(templateContent, 5);
   }
 
   // 数据帧的复制
   const duplicateFrame = (keyToDuplicate) => {
-    const frameToDuplicate = frameRefs.current.find((ref, index) => frames[index] === keyToDuplicate); // 找到要复制的数据帧的代码内容
-    const timeToDuplicate = frameTimes.current.find((ref, index) => frames[index] === keyToDuplicate); // 找到要复制的数据帧的持续时间
+    const frameToDuplicate = frameRefs.current.find((ref, index) => frames[index] === keyToDuplicate);
+    const timeToDuplicate = frameTimeRefs.current.find((ref, index) => frames[index] === keyToDuplicate);
+    console.log(frameToDuplicate, timeToDuplicate)
     if (!frameToDuplicate || !frameToDuplicate.current || !timeToDuplicate || !timeToDuplicate.current) {
       console.error(`No ref found for frame ${keyToDuplicate}`);
       return;
     }
     const newFrameContent = frameToDuplicate.current.value;
-    const newFrameTime = timeToDuplicate.current.value;
+    const newFrameTime = timeToDuplicate.current;
 
     // 判断数据的代码、持续时间是否为空
-    if (newFrameContent === '' || newFrameTime === '') {
-      console.error('time or frameCode is empty')
+    if (newFrameContent === '') {
+      console.error('frameCode is empty')
       return;
     }
     newFrame(newFrameContent, newFrameTime);
   };
 
-  useEffect(() => {
-    if (newFrameContent !== '' && frameRefs.current.length > 0) {
-      const newFrameRef = frameRefs.current[frameRefs.current.length - 1];
-      if (newFrameRef && newFrameRef.current) {
-        newFrameRef.current.value = newFrameContent; // 将被复制的数据帧的代码赋值给最后一个数据帧
-      }
-    }
-    if (newFrameTime !== '' && frameTimes.current.length > 0) {
-      const newTimeRef = frameTimes.current[frameTimes.current.length - 1];
-      if (newTimeRef && newTimeRef.current) {
-        newTimeRef.current.value = newFrameTime; // 将被复制的数据帧的持续时间赋值给最后一个数据帧
-      }
-    }
-  }, [newFrameContent, newFrameTime]);
+
 
   // 数据帧的删除
   const handleDeleteFrame = (keyToDelete) => {
     setFrames(prevFrames => prevFrames.filter(key => key !== keyToDelete));
     const indexToDelete = frameRefs.current.findIndex((ref, index) => frames[index] === keyToDelete);
     frameRefs.current.splice(indexToDelete, 1);
+    frameTimeRefs.current.splice(indexToDelete, 1);
   };
 
   // 数据帧的上移
@@ -275,7 +276,6 @@ export default function HomePage() {
   return (
     <main className="grid grid-cols-none grid-rows-6 md:grid-rows-none md:grid-cols-12 h-screen w-screen gap-6 p-6 bg-zinc-800 text-zinc-100">
       <div className='row-span-2 md:col-span-6'>
-        <div className='text-xl font-medium pb-2'>Chart Area</div>
         <section id='ChartArea' className='aspect-video bg-white p-2 w-[95%] my-0 mx-[auto] md:w-full'>
           <EChartsComponent option={option} onChartReady={chart => chartRef.current = chart} />
         </section>
@@ -323,7 +323,7 @@ export default function HomePage() {
               preivewFrame={preivewFrame}
               duplicateFrame={duplicateFrame}
               handleDeleteFrame={handleDeleteFrame}
-              frameTimes={frameTimes}
+              frameTimeRefs={frameTimeRefs}
               frameRefs={frameRefs}
               chartMode={chartMode} // chartMode 用于记录当前的图表模式
             />
@@ -335,3 +335,5 @@ export default function HomePage() {
     </main >
   );
 }
+
+export default HomePage;
