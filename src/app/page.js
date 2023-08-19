@@ -4,16 +4,17 @@ import React from 'react';
 import { useState, useRef, useEffect, createRef } from 'react';
 import { Combobox } from '@headlessui/react'
 import EChartsComponent from './components/EChartsComponent';
-import NeoFrameEditor from './components/NeoFrameEditor';
+import NeoFrameEditor from './components/FrameEditor';
+
 import barTemplate from './components/echartOpt/bar.json';
 import lineTemplate from './components/echartOpt/line.json';
 import pieTemplate from './components/echartOpt/pie.json';
 
 const chartModeList = [
-  'bar', 'line', 'smoothLine', 'pie', 'Others'
+  'Bar', 'Line', 'SmoothLine', 'Pie', 'Customize'
 ]
 
-export function HomePage() {
+export default function HomePage() {
 
   //默认图谱
   const [option] = useState({
@@ -128,13 +129,13 @@ export function HomePage() {
   // 根据模板新建关键帧
   const newTemplateFrame = () => {
     console.log('Now Chart Mode is ' + chartMode)
-    if (chartMode == 'bar') { // 新建柱状图
+    if (chartMode == 'Bar') { // 新建柱状图
       const barTemplateString = JSON.stringify(barTemplate, null, 5);
       newFrame(barTemplateString, 5);
-    } else if (chartMode == 'line') { // 新建折线图
+    } else if (chartMode == 'Line') { // 新建折线图
       const lineTemplateString = JSON.stringify(lineTemplate, null, 5);
       newFrame(lineTemplateString, 5);
-    } else if (chartMode == 'pie') { // 新建饼图
+    } else if (chartMode == 'Pie') { // 新建饼图
       const pieTemplateString = JSON.stringify(pieTemplate, null, 5);
       newFrame(pieTemplateString, 5);
     } else {
@@ -242,23 +243,26 @@ export function HomePage() {
         <section id='ChartArea' className='aspect-video bg-white p-2 w-[95%] my-0 mx-[auto] md:w-full'>
           <EChartsComponent option={option} onChartReady={chart => chartRef.current = chart} />
         </section>
+        <div className='grid grid-cols-2 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
+          <button onClick={handleClick} className='block py-1 px-2 text-md text-main border-main border-2 rounded-lg'>Play DataMotion</button>
+        </div>
         <div className='flex flex-row gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
-          <button onClick={handleClick} className='py-1 px-2 text-md text-main border-main border-2 rounded-lg'>Play DataMotion</button>
+          <button onClick={handleNewFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg'>New Blank DataFrame</button>
+          <button onClick={newTemplateFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg'>New Template DataFrame</button>
         </div>
-        <div className='flex gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
-          <div>
-            <Combobox value={chartMode} onChange={setChartMode}>
-              <Combobox.Input onChange={(event) => setQuery(event.target.value)} className='bg-zinc-800 py-1 border text-center rounded-lg w-20' />
-              <Combobox.Options className='bg-zinc-800 mt-2 py-1 border text-center rounded-lg w-20'>
-                {filteredChartMode.map((chartMode) => (
-                  <Combobox.Option key={chartMode} value={chartMode}>
-                    {chartMode}
-                  </Combobox.Option>
-                ))}
-              </Combobox.Options>
-            </Combobox>
+        <Combobox value={chartMode} onChange={setChartMode}>
+          <div className='flex flex-row gap-2'>
+            <Combobox.Input onChange={(event) => setQuery(event.target.value)} className='grow bg-zinc-800 py-1 border-2 text-center rounded-lg' />
+            <Combobox.Button className="bg-zinc-800 px-2 py-1 border-2 text-center rounded-lg">Choose Template</Combobox.Button>
           </div>
-        </div>
+          <Combobox.Options className='relative text-center shadow-lg bg-zinc-800 mt-2 py-1 border rounded-lg'>
+            {filteredChartMode.map((chartMode) => (
+              <Combobox.Option key={chartMode} value={chartMode}>
+                {chartMode}
+              </Combobox.Option>
+            ))}
+          </Combobox.Options>
+        </Combobox>
       </div>
       <section id="EditArea" className='row-span-4 md:col-span-5'>
         <div className='text-xl font-medium pb-2'>DataFrame Editor</div>
@@ -283,13 +287,9 @@ export function HomePage() {
             />
           ))}
         </div>
-        <div id='EditFloatButton' className='grid grid-cols-2 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
-          <button onClick={handleNewFrame} className='px-1 md:p-2 flex flex-col items-center border rounded-full'>New Blank DataFrame</button>
-          <button onClick={newTemplateFrame} className='px-1 md:p-2 flex flex-col items-center border rounded-full'>New Template DataFrame</button>
+        <div id='EditFloatButton' className='flex gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
         </div>
       </section>
     </main >
   );
 }
-
-export default HomePage

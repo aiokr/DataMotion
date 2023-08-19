@@ -1,19 +1,35 @@
-import { useState, useRef, useEffect, createRef } from 'react';
+import React from 'react';
+import { useState, useRef, useEffect, createRef, RefObject } from 'react';
 
+interface DataFrameEditorProps {
+  frameKey: string;
+  index: number;
+  handleMoveUp: (key: string) => void;
+  handleMoveDown: (key: string) => void;
+  toggleTextarea: (key: string) => void;
+  toggleNewEditor: (key: string) => void;
+  textareaVisibility: { [key: string]: boolean };
+  NeoEditVisibility: { [key: string]: boolean };
+  preivewFrame: (key: string) => void;
+  duplicateFrame: (key: string) => void;
+  handleDeleteFrame: (key: string) => void;
+  frameTimes: number[];
+  frameRefs: RefObject<{ current: any }[]>;
+  chartMode: string;
+}
 
-
-const DataFrameEditor = ({ frameKey, index, handleMoveUp, handleMoveDown, toggleTextarea, toggleNewEditor, textareaVisibility, NeoEditVisibility, preivewFrame, duplicateFrame, handleDeleteFrame, frameTimes, frameRefs, chartMode }) => {
-
-  const [dataFrameNum, setDataFrameNum] = useState(null);
-  const [dataFrameType, setDataFrameType] = useState(null);
-  const [hiddenDataArea, setHiddenDataArea] = useState(null);
+const DataFrameEditor: React.FC<DataFrameEditorProps> = ({ frameKey, index, handleMoveUp, handleMoveDown, toggleTextarea, toggleNewEditor, textareaVisibility, NeoEditVisibility, preivewFrame, duplicateFrame, handleDeleteFrame, frameTimes, frameRefs, chartMode }) => {
+  const [dataFrameNum, setDataFrameNum] = useState<number | null>(null);
+  const [dataFrameType, setDataFrameType] = useState<string | null>(null);
+  const [hiddenDataArea, setHiddenDataArea] = useState<any>(null);
+  const frameTimeRef = useRef<HTMLInputElement>(null); // 创建一个新的 ref
 
   // 获取数据帧输入，并格式化和解析
   const getDataFrame = () => {
-    if (chartMode !== 'Others') { // 当 Others 时，不格式化代码
+    if (chartMode !== 'Customize') { // 当 Others 时，不格式化代码
       try {
         const optionRawText = frameRefs.current[index].current.value; // 获取数据帧的代码
-        const time = frameTimes.current[index].current.value; // 获取数据帧的持续时间代码
+        const time = frameTimes[index]; // 获取数据帧的持续时间代码
         const optionJsCode = eval('(' + optionRawText + ')'); // 解析数据帧的代码
         let optionTextJson = JSON.stringify(optionJsCode, null, 2);  // 将数据帧的代码转换为 JSON 格式
         let optionStatus = JSON.parse(optionTextJson); // 解析 JSON 格式的数据帧为 JS 对象
@@ -44,64 +60,14 @@ const DataFrameEditor = ({ frameKey, index, handleMoveUp, handleMoveDown, toggle
     }
   })();
 
-  // 监听 chartMode 的变化，并调用 changeDataFrameType 修改 series[0].type
-  useEffect(() => {
-    changeDataFrameType();
-  }, [chartMode]);
-
-  const changeDataFrameType = () => {
-    if (chartMode !== 'Others') { // 当 Others 时，不格式化代码
-      try {
-        const optionRawText = frameRefs.current[index].current.value; // 获取数据帧的代码
-        const optionJsCode = eval('(' + optionRawText + ')'); // 解析数据帧的代码
-        let optionTextJson = JSON.stringify(optionJsCode, null, 2);  // 将数据帧的代码转换为 JSON 格式
-        let optionStatus = JSON.parse(optionTextJson); // 解析 JSON 格式的数据帧为 JS 对象
-        // 当 chartMode 改变时，自动改变 series 的 type
-        if (chartMode !== dataFrameType) {
-
-          if (chartMode == 'line') {
-            optionStatus.series[0].type = 'line'
-            optionStatus.series[0].smooth = false;
-          }
-
-          if (chartMode == 'smoothLine') {
-            optionStatus.series[0].type = 'line'
-            optionStatus.series[0].smooth = true;
-          }
-
-          if (chartMode == 'pie') {
-            optionStatus.series[0].type = 'pie'
-            delete optionStatus.series[0].smooth;
-            hiddenData(optionStatus.xAxis);
-            delete optionStatus.xAxis;
-            hiddenData(optionStatus.yAxis);
-            delete optionStatus.yAxis
-          }
-
-          if (chartMode == 'bar') {
-            optionStatus.series[0].type = 'bar'
-            delete optionStatus.series[0].smooth;
-          }
-
-          //optionStatus.series[0].type = chartMode;
-          setDataFrameType(chartMode);
-          const newOptionTextJson = JSON.stringify(optionStatus, null, 2); // 将 JS 对象转换为 JSON 格式
-          frameRefs.current[index].current.value = newOptionTextJson; // 回输数据帧的代码
-        }
-      } catch (error) {
-        // 这里可以处理错误，例如显示一条错误消息
-        console.error('An error occurred:', error);
-      }
-    }
-  }
-
   return (
     <div className='w-full bg-zinc-600 px-4 py-3 mb-5 transition rounded-lg block'>
       <div className='grid grid-cols-12 pb-2'>
         <div className='col-span-11'>
           <div className='text-md md:text-lg font-bold pb-2'>DataFrame Key: {frameKey} / Index: {index}</div>
           <div>
-            Duration Seconds <input ref={frameTimes.current[index]} defaultValue={frameTimes.current[index].current} onBlur={getDataFrame} className='border-2 border-zinc-700 bg-zinc-600 mx-2 px-2 py-1 w-12  text-center rounded-lg text-sm'></input></div>
+            Duration Seconds <input ref={frameTimeRef} defaultValue={frameTimes[index]} onBlur={getDataFrame} className='border-2 border-zinc-700 bg-zinc-600 mx-2 px-2 py-1 w-12  text-center rounded-lg text-sm'></input>
+          </div>
         </div>
         <div className='col-span-1 grid grid-rows-2 gap-1 pb-4'>
           <button onClick={() => handleMoveUp(frameKey)} className='bg-zinc-500 rounded-lg text-sm'>
