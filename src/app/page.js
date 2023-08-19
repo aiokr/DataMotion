@@ -236,15 +236,57 @@ export default function HomePage() {
     }
   }, [frames.length]);
 
+  // 修改背景颜色
+
+  const setWhiteBg = () => {
+    document.getElementById('ChartArea').style.backgroundImage = `none`;
+    document.getElementById('ChartArea').style.backgroundColor = 'white';
+
+  }
+
+
+  const setBlueBg = () => {
+    document.getElementById('ChartArea').style.backgroundImage = `none`;
+    document.getElementById('ChartArea').style.backgroundColor = 'blue';
+
+  }
+
+  const setGreenBg = () => {
+    document.getElementById('ChartArea').style.backgroundImage = `none`;
+    document.getElementById('ChartArea').style.backgroundColor = 'green';
+
+  }
+
+  const setImageBg = () => {
+    const bgImage = event.target.files[0];
+    if (bgImage) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        document.getElementById('ChartArea').style.backgroundImage = `url(${reader.result})`;
+        document.getElementById('ChartArea').style.backgroundSize = 'cover';  // 背景图片覆盖整个元素
+        document.getElementById('ChartArea').style.backgroundRepeat = 'no-repeat';  // 背景图片不重复
+        document.getElementById('ChartArea').style.backgroundPosition = 'center';  // 背景图片居中
+      };
+      reader.readAsDataURL(bgImage);
+    }
+  }
+
+
   return (
     <main className="grid grid-cols-none grid-rows-6 md:grid-rows-none md:grid-cols-12 h-screen w-screen gap-6 p-6 bg-zinc-800 text-zinc-100">
-      <div className='row-span-2 md:col-span-7'>
+      <div className='row-span-2 md:col-span-6'>
         <div className='text-xl font-medium pb-2'>Chart Area</div>
         <section id='ChartArea' className='aspect-video bg-white p-2 w-[95%] my-0 mx-[auto] md:w-full'>
           <EChartsComponent option={option} onChartReady={chart => chartRef.current = chart} />
         </section>
         <div className='grid grid-cols-2 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
           <button onClick={handleClick} className='block py-1 px-2 text-md text-main border-main border-2 rounded-lg'>Play DataMotion</button>
+        </div>
+        <div className='grid grid-cols-6 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
+          <button onClick={setWhiteBg} className='block py-1 px-1 text-xs text-white border-white border-2 rounded-lg'>White Screen</button>
+          <button onClick={setBlueBg} className='block py-1 px-1 text-xs text-blue-500 border-blue-500 border-2 rounded-lg'>Blue Screen</button>
+          <button onClick={setGreenBg} className='block py-1 px-1 text-xs text-green-500 border-green-500 border-2 rounded-lg'>Green Screen</button>
+          <input type="file" accept="image/*" onChange={setImageBg} className='block py-1 px-1 text-xs text-green-500 border-green-500 bg-transparent border-2 rounded-lg'></input>
         </div>
         <div className='flex flex-row gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
           <button onClick={handleNewFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg'>New Blank DataFrame</button>
@@ -264,7 +306,7 @@ export default function HomePage() {
           </Combobox.Options>
         </Combobox>
       </div>
-      <section id="EditArea" className='row-span-4 md:col-span-5'>
+      <section id="EditArea" className='row-span-4 md:col-span-6'>
         <div className='text-xl font-medium pb-2'>DataFrame Editor</div>
         <div className='pb-2 overflow-y-auto h-[80%] w-[95%] md:w-full md:h-[calc(100vh-140px)] mx-[auto]'>
           {frames.map((key, index) => (
