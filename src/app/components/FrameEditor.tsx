@@ -4,17 +4,17 @@ import { useState, useRef, useEffect, createRef, RefObject } from 'react';
 interface DataFrameEditorProps {
   frameKey: number;
   index: number;
-  handleMoveUp: (key: string) => void;
-  handleMoveDown: (key: string) => void;
-  toggleTextarea: (key: string) => void;
-  toggleNewEditor: (key: string) => void;
-  textareaVisibility: { [key: string]: boolean };
-  NeoEditVisibility: { [key: string]: boolean };
-  preivewFrame: (key: string) => void;
-  duplicateFrame: (key: string) => void;
-  handleDeleteFrame: (key: string) => void;
+  handleMoveUp: (key: number) => void;
+  handleMoveDown: (key: number) => void;
+  toggleTextarea: (key: number) => void;
+  toggleNewEditor: (key: number) => void;
+  textareaVisibility: { [key: number]: boolean };
+  NeoEditVisibility: { [key: number]: boolean };
+  preivewFrame: (key: number) => void;
+  duplicateFrame: (key: number) => void;
+  handleDeleteFrame: (key: number) => void;
   frameTimeRefs: RefObject<{ current: number }[]>;
-  frameRefs: RefObject<HTMLTextAreaElement>[];
+  frameRefs: RefObject<{ current: string }[]>;
   chartMode: string;
 }
 
@@ -23,13 +23,14 @@ const DataFrameEditor: React.FC<DataFrameEditorProps> = ({ frameKey, index, hand
   const [dataFrameType, setDataFrameType] = useState<string | null>(null);
   const [hiddenDataArea, setHiddenDataArea] = useState<any>(null);
   const [frameTime, setFrameTime] = useState(frameTimeRefs.current[index]?.current || 0);
+  const [frame, setFrame] = useState(frameRefs.current[index]?.current);
 
 
   // 获取数据帧输入，并格式化和解析
   const getDataFrame = () => {
     if (chartMode !== 'Customize') { // 当 Others 时，不格式化代码
       try {
-        const optionRawText = frameRefs.current[index].current.value; // 获取数据帧的代码
+        const optionRawText = frameRefs[index].current.value; // 获取数据帧的代码
         const time = frameTimeRefs; // 获取数据帧的持续时间代码
         const optionJsCode = eval('(' + optionRawText + ')'); // 解析数据帧的代码
         let optionTextJson = JSON.stringify(optionJsCode, null, 2);  // 将数据帧的代码转换为 JSON 格式
@@ -45,7 +46,7 @@ const DataFrameEditor: React.FC<DataFrameEditorProps> = ({ frameKey, index, hand
         }
 
         const newOptionTextJson = JSON.stringify(optionStatus, null, 2); // 将 JS 对象转换为 JSON 格式
-        frameRefs.current[index].current.value = newOptionTextJson; // 回输数据帧的代码
+        frameRefs[index].current.value = newOptionTextJson; // 回输数据帧的代码
 
       } catch (error) {
         // 这里可以处理错误，例如显示一条错误消息
@@ -105,8 +106,11 @@ const DataFrameEditor: React.FC<DataFrameEditorProps> = ({ frameKey, index, hand
       </div>
       {/* 代码编辑器 */}
       <textarea
-        ref={frameRefs.current[index]}
-        defaultValue={frameRefs.current[index]?.current}
+        value={frameRefs.current[index].current}
+        onChange={e => {
+          setFrame(e.target.value);
+          frameRefs.current[index].current = e.target.value;
+        }}
         className='w-full h-48 p-2 my-2 rounded-lg bg-zinc-800 focus:outline-main'
         style={{ display: textareaVisibility[frameKey] ? 'none' : 'block' }}
       />

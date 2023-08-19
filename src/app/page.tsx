@@ -13,13 +13,7 @@ const chartModeList: string[] = [
   'Bar', 'Line', 'SmoothLine', 'Pie', 'Customize'
 ]
 
-interface FrameMotionMainPage {
-  frameTime: number;
-  frameRefs: RefObject<HTMLTextAreaElement>[];
-}
-
-
-const HomePage: React.FC<FrameMotionMainPage> = () => {
+const HomePage: React.FC = () => {
 
   //默认图谱
   const [option] = useState({
@@ -79,14 +73,14 @@ const HomePage: React.FC<FrameMotionMainPage> = () => {
       }
       try {
         var option;
-        eval(`option = ${frameRef.current.value}`);
+        eval(`option = ${frameRef.current}`);
         chartRef.current.setOption(option, true);
       } catch (error) {
         console.error('Invalid option', error);
       }
       i++;
       // 持续时间
-setTimeout(loadNextFrame, Number(frameTimeRef.current) * 1000);
+      setTimeout(loadNextFrame, Number(frameTimeRef.current) * 1000);
     };
     loadNextFrame();
   };
@@ -101,7 +95,7 @@ setTimeout(loadNextFrame, Number(frameTimeRef.current) * 1000);
     }
     try {
       var option
-      eval(`option = ${frameRef.current.value}`);
+      eval(`option = ${frameRef.current}`);
       chartRef.current.setOption(option, true);
     } catch (error) {
       console.error('Invalid option:', error);
@@ -164,7 +158,7 @@ setTimeout(loadNextFrame, Number(frameTimeRef.current) * 1000);
       console.error(`No ref found for frame ${keyToDuplicate}`);
       return;
     }
-    const newFrameContent = frameToDuplicate.current.value;
+    const newFrameContent = frameToDuplicate.current;
     const newFrameTime = timeToDuplicate.current;
 
     // 判断数据的代码、持续时间是否为空
@@ -258,8 +252,8 @@ setTimeout(loadNextFrame, Number(frameTimeRef.current) * 1000);
 
   }
 
-  const setImageBg = () => {
-    const bgImage = event.target.files[0];
+const setImageBg = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const bgImage = event.target.files && event.target.files[0];
     if (bgImage) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -277,7 +271,7 @@ setTimeout(loadNextFrame, Number(frameTimeRef.current) * 1000);
     <main className="grid grid-cols-none grid-rows-6 md:grid-rows-none md:grid-cols-12 h-screen w-screen gap-6 p-6 bg-zinc-800 text-zinc-100">
       <div className='row-span-2 md:col-span-6'>
         <section id='ChartArea' className='aspect-video bg-white p-2 w-[95%] my-0 mx-[auto] md:w-full'>
-          <EChartsComponent option={option} onChartReady={chart => chartRef.current = chart} />
+          <EChartsComponent option={option} onChartReady={chart => chartRef.current = chart} width='auto' height='auto' />
         </section>
         <div className='grid grid-cols-2 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
           <button onClick={handleClick} className='block py-1 px-2 text-md text-main border-main border-2 rounded-lg'>Play DataMotion</button>
