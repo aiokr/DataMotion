@@ -27,6 +27,7 @@ export default function RootLayout({ children }) {
               gtag('config', 'G-98EHF8GGMM');
             `}
           </Script>
+          <script async src="https://analytics.umami.is/script.js" data-website-id="745420a0-b78f-45be-b4ea-237a5585dfed"></script>
         </div>
       </body>
     </html>

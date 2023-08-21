@@ -97,10 +97,10 @@ const DataFrameEditor: React.FC<DataFrameEditorProps> = ({ frameKey, index, hand
       </div>
       {/* 编辑器显示/隐藏按钮 */}
       <div className='mt-4 flex gap-2'>
-        <button onClick={() => toggleTextarea(frameKey)} className="flex-1 rounded-lg text-sm py-1 border-2 border-zinc-700">
+        <button onClick={() => toggleTextarea(frameKey)} className="flex-1 rounded-lg text-sm py-1 border-2 border-zinc-700" data-umami-event="toggleCodeEditor">
           Code Editor
         </button>
-        <button onClick={() => toggleNewEditor(frameKey)} className="flex-1 rounded-lg text-sm py-1 border-2 border-zinc-700">
+        <button onClick={() => toggleNewEditor(frameKey)} className="flex-1 rounded-lg text-sm py-1 border-2 border-zinc-700" data-umami-event="toggleNeoEditor">
           Neo Editor
         </button>
       </div>
@@ -118,12 +118,12 @@ const DataFrameEditor: React.FC<DataFrameEditorProps> = ({ frameKey, index, hand
       <div
         className='w-full p-2 my-2 rounded-lg border-2 border-main'
         style={{ display: NeoEditVisibility[frameKey] ? 'block' : 'none' }}>
-        Neo Editor (Codeing……)
+        Neo Editor (Coding……)
       </div>
       <div className='mt-2 flex gap-2'>
-        <button onClick={() => preivewFrame(frameKey)} className='flex-1 py-1 px-2 text-sm border-2 border-zinc-700 rounded-lg'>Preivew</button>
-        <button onClick={() => duplicateFrame(frameKey)} className='flex-1 py-1 px-2 text-sm  border-2 border-zinc-700 rounded-lg'>Duplicate</button>
-        <button onClick={() => handleDeleteFrame(frameKey)} className='py-1 px-2 text-sm text-red-400 border-red-500 border-2 rounded-lg float-right'>Delete</button>
+        <button onClick={() => preivewFrame(frameKey)} className='flex-1 py-1 px-2 text-sm border-2 border-zinc-700 rounded-lg' data-umami-event="preivewDataFrame">Preivew</button>
+        <button onClick={() => duplicateFrame(frameKey)} className='flex-1 py-1 px-2 text-sm  border-2 border-zinc-700 rounded-lg' data-umami-event="duplicateDataFrame">Duplicate</button>
+        <button onClick={() => handleDeleteFrame(frameKey)} className='py-1 px-2 text-sm text-red-400 border-red-500 border-2 rounded-lg float-right' data-umami-event="deleteDataFrame">Delete</button>
       </div>
     </div>
   );

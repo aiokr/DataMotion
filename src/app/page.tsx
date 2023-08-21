@@ -290,7 +290,7 @@ const HomePage: React.FC = () => {
           <EChartsComponent option={option} onChartReady={chart => chartRef.current = chart} width='auto' height='auto' />
         </section>
         <div className='grid grid-cols-2 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
-          <button onClick={handleClick} className='block py-1 px-2 text-md text-main border-main border-2 rounded-lg'>Play DataMotion</button>
+          <button onClick={handleClick} className='block py-1 px-2 text-md text-main border-main border-2 rounded-lg' data-umami-event="playMotion">Play DataMotion</button>
         </div>
         <div className='grid grid-cols-6 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
           <button onClick={setWhiteBg} className='block py-1 px-1 text-xs text-white border-white border-2 rounded-lg'>White Screen</button>
@@ -299,8 +299,8 @@ const HomePage: React.FC = () => {
           <input type="file" accept="image/*" onChange={setImageBg} className='block py-1 px-1 text-xs text-green-500 border-green-500 bg-transparent border-2 rounded-lg'></input>
         </div>
         <div className='flex flex-row gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
-          <button onClick={handleNewFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg'>New Blank DataFrame</button>
-          <button onClick={newTemplateFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg'>New Template DataFrame</button>
+          <button onClick={handleNewFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="newBlankDataFrame">New Blank DataFrame</button>
+          <button onClick={newTemplateFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="newTemplateDataFrame">New Template DataFrame</button>
         </div>
         <Combobox value={chartMode} onChange={setChartMode}>
           <div className='flex flex-row gap-2'>
