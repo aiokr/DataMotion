@@ -351,8 +351,8 @@ const HomePage: React.FC = () => {
           <input type="file" onChange={importFile} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="importFile"></input>
         </div>
         <div className='flex flex-row gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
-          <button onClick={handleNewFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="newBlankDataFrame">New Blank DataFrame</button>
-          <button onClick={newTemplateFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="newTemplateDataFrame">New Template DataFrame</button>
+          <button onClick={handleNewFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="newFrame">New Blank DataFrame</button>
+          <button onClick={newTemplateFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="newFrame">New Template DataFrame</button>
         </div>
         <Combobox value={chartMode} onChange={setChartMode}>
           <div className='flex flex-row gap-2'>

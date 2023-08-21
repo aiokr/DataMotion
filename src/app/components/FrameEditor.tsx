@@ -121,9 +121,9 @@ const DataFrameEditor: React.FC<DataFrameEditorProps> = ({ frameKey, index, hand
         Neo Editor (Coding……)
       </div>
       <div className='mt-2 flex gap-2'>
-        <button onClick={() => preivewFrame(frameKey)} className='flex-1 py-1 px-2 text-sm border-2 border-zinc-700 rounded-lg' data-umami-event="preivewDataFrame">Preivew</button>
-        <button onClick={() => duplicateFrame(frameKey)} className='flex-1 py-1 px-2 text-sm  border-2 border-zinc-700 rounded-lg' data-umami-event="duplicateDataFrame">Duplicate</button>
-        <button onClick={() => handleDeleteFrame(frameKey)} className='py-1 px-2 text-sm text-red-400 border-red-500 border-2 rounded-lg float-right' data-umami-event="deleteDataFrame">Delete</button>
+        <button onClick={() => preivewFrame(frameKey)} className='flex-1 py-1 px-2 text-sm border-2 border-zinc-700 rounded-lg'>Preivew</button>
+        <button onClick={() => duplicateFrame(frameKey)} className='flex-1 py-1 px-2 text-sm  border-2 border-zinc-700 rounded-lg' data-umami-event="newFrame">Duplicate</button>
+        <button onClick={() => handleDeleteFrame(frameKey)} className='py-1 px-2 text-sm text-red-400 border-red-500 border-2 rounded-lg float-right'>Delete</button>
       </div>
     </div>
   );
