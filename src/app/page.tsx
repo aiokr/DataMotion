@@ -192,6 +192,14 @@ const HomePage: React.FC = () => {
       updatedFrames[frameIndex] = temp;
       return updatedFrames;
     });
+    // 也改变 frameRefs 和 frameTimeRefs 数组的顺序
+    const frameIndex = frameRefs.current.findIndex((ref, index) => frames[index] === key);
+    const temp = frameRefs.current[frameIndex - 1];
+    frameRefs.current[frameIndex - 1] = frameRefs.current[frameIndex];
+    frameRefs.current[frameIndex] = temp;
+    const tempTime = frameTimeRefs.current[frameIndex - 1];
+    frameTimeRefs.current[frameIndex - 1] = frameTimeRefs.current[frameIndex];
+    frameTimeRefs.current[frameIndex] = tempTime;
   };
 
   // 数据帧的下移
@@ -207,6 +215,14 @@ const HomePage: React.FC = () => {
       updatedFrames[frameIndex] = temp;
       return updatedFrames;
     });
+    // 也改变 frameRefs 和 frameTimeRefs 数组的顺序
+    const frameIndex = frameRefs.current.findIndex((ref, index) => frames[index] === key);
+    const temp = frameRefs.current[frameIndex + 1];
+    frameRefs.current[frameIndex + 1] = frameRefs.current[frameIndex];
+    frameRefs.current[frameIndex] = temp;
+    const tempTime = frameTimeRefs.current[frameIndex + 1];
+    frameTimeRefs.current[frameIndex + 1] = frameTimeRefs.current[frameIndex];
+    frameTimeRefs.current[frameIndex] = tempTime;
   };
 
   // 切换指定key的 代码编辑器 的显示/隐藏状态
@@ -252,8 +268,8 @@ const HomePage: React.FC = () => {
 
   }
 
-const setImageBg = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const bgImage = event.target.files && event.target.files[0];
+  const setImageBg = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const bgImage = event.target.files && event.target.files[0];
     if (bgImage) {
       const reader = new FileReader();
       reader.onloadend = () => {
