@@ -58,7 +58,7 @@ const HomePage: React.FC = () => {
   // Play 按钮，播放当前完整的图表动画
   const handleClick = () => {
     console.log('Reload ECharts');
-    let i = 0;
+    let i: number = 0;
 
     const loadNextFrame = () => {
       if (i >= frames.length) {
@@ -252,20 +252,17 @@ const HomePage: React.FC = () => {
   const setWhiteBg = () => {
     document.getElementById('ChartArea').style.backgroundImage = `none`;
     document.getElementById('ChartArea').style.backgroundColor = 'white';
-
   }
 
 
   const setBlueBg = () => {
     document.getElementById('ChartArea').style.backgroundImage = `none`;
     document.getElementById('ChartArea').style.backgroundColor = 'blue';
-
   }
 
   const setGreenBg = () => {
     document.getElementById('ChartArea').style.backgroundImage = `none`;
     document.getElementById('ChartArea').style.backgroundColor = 'green';
-
   }
 
   const setImageBg = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -282,6 +279,57 @@ const HomePage: React.FC = () => {
     }
   }
 
+  // 导出数据
+  const exportFile = () => {
+    let i: number = 0;
+    const dataFrames = [];
+    const loadFrametoFile = () => {
+      if (i >= frames.length) {
+        const json = JSON.stringify(dataFrames, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'data.json';
+        link.click();
+        return;
+      }
+      const key = frames[i];
+      const frameRef = frameRefs.current.find((ref, index) => frames[index] === key);
+      const frameTimeRef = frameTimeRefs.current.find((ref, index) => frames[index] === key);
+      if (!frameRef || !frameRef.current || !frameTimeRef || !frameTimeRefs.current) {
+        console.error(`No ref found for frame ${key}`);
+        return;
+      }
+      const data = {
+        dataFrameKey: key,
+        dataFrameContent: frameRef.current,
+        dataFrameTime: frameTimeRef.current
+      }
+      dataFrames.push(data);
+      i++;
+      setTimeout(loadFrametoFile, 1);
+    };
+    loadFrametoFile();
+  }
+
+  // 导入数据
+  const importFile = (event) => {
+    const file = event.target.files[0];
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataFrames = JSON.parse(e.target.result as string);
+
+      console.log(dataFrames)
+      setFrames(dataFrames.map(df => df.dataFrameKey));
+      frameRefs.current = dataFrames.map(df => ({ current: df.dataFrameContent }));
+      frameTimeRefs.current = dataFrames.map(df => ({ current: df.dataFrameTime }));
+    };
+    reader.readAsText(file);
+  };
 
   return (
     <main className="grid grid-cols-none grid-rows-6 md:grid-rows-none md:grid-cols-12 h-screen w-screen gap-6 p-6 bg-zinc-800 text-zinc-100">
@@ -296,7 +344,11 @@ const HomePage: React.FC = () => {
           <button onClick={setWhiteBg} className='block py-1 px-1 text-xs text-white border-white border-2 rounded-lg'>White Screen</button>
           <button onClick={setBlueBg} className='block py-1 px-1 text-xs text-blue-500 border-blue-500 border-2 rounded-lg'>Blue Screen</button>
           <button onClick={setGreenBg} className='block py-1 px-1 text-xs text-green-500 border-green-500 border-2 rounded-lg'>Green Screen</button>
-          <input type="file" accept="image/*" onChange={setImageBg} className='block py-1 px-1 text-xs text-green-500 border-green-500 bg-transparent border-2 rounded-lg'></input>
+          <input type="file" accept="image/*" onChange={setImageBg} className='block py-1 px-1 text-xs text-white border-white bg-transparent border-2 rounded-lg'></input>
+        </div>
+        <div className='flex flex-row gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
+          <button onClick={exportFile} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="exportFile">Export Json File</button>
+          <input type="file" onChange={importFile} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="importFile"></input>
         </div>
         <div className='flex flex-row gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
           <button onClick={handleNewFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="newBlankDataFrame">New Blank DataFrame</button>
