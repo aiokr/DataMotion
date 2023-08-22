@@ -118,18 +118,21 @@ const HomePage: React.FC = () => {
 
   // 带有参数的新建数据帧
   const newFrame = (frameContent = '', frameTime: number) => {
+
+    setFrameCount(prevCount => prevCount + 1);
+    setFrames(prevFrames => [...prevFrames, frameCount]); // 使用计数器的值作为新元素的key
+    // 更新ref
+    frameRefs.current.push({ current: frameContent });
+    frameTimeRefs.current.push({ current: frameTime });
+
     const frameTimeAsNumber = Number(frameTime);
     if (isNaN(frameTimeAsNumber)) {
       console.error('frameTime is not a number:', frameTime);
       return;
     }
 
-    setFrameCount(prevCount => prevCount + 1);
-    setFrames(prevFrames => [...prevFrames, frameCount]);
 
-    // 更新ref
-    frameRefs.current.push({ current: frameContent });
-    frameTimeRefs.current.push({ current: frameTime });
+
 
     console.log(frameContent, frameTime)
   };
@@ -161,7 +164,7 @@ const HomePage: React.FC = () => {
     const newFrameContent = frameToDuplicate.current;
     const newFrameTime = timeToDuplicate.current;
 
-    // 判断数据的代码、持续时间是否为空
+    // 判断数据的代码是否为空
     if (newFrameContent === '') {
       console.error('frameCode is empty')
       return;
@@ -322,19 +325,21 @@ const HomePage: React.FC = () => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataFrames = JSON.parse(e.target.result as string);
-
+      let nextKey = frameCount; // 获取当前的帧数量
+      const newFrames = dataFrames.map(() => nextKey++); // 为每个帧分配一个新的key
       console.log(dataFrames)
-      setFrames(dataFrames.map(df => df.dataFrameKey));
+      setFrames(newFrames);
       frameRefs.current = dataFrames.map(df => ({ current: df.dataFrameContent }));
       frameTimeRefs.current = dataFrames.map(df => ({ current: df.dataFrameTime }));
+      setFrameCount(nextKey); // 更新帧数量
     };
     reader.readAsText(file);
   };
 
   return (
-    <main className="grid grid-cols-none grid-rows-6 md:grid-rows-none md:grid-cols-12 h-screen w-screen gap-6 p-6 bg-zinc-800 text-zinc-100">
+    <main className="grid grid-cols-none grid-rows-6 md:grid-rows-none md:grid-cols-12 h-screen w-screen gap-6 p-6 bg-slate-100 text-zinc-900">
       <div className='row-span-2 md:col-span-6'>
-        <section id='ChartArea' className='aspect-video bg-white p-2 w-[95%] my-0 mx-[auto] md:w-full'>
+        <section id='ChartArea' className='aspect-video bg-white p-2 w-[95%] my-0 mx-[auto] md:w-full shadow-2xl'>
           <EChartsComponent option={option} onChartReady={chart => chartRef.current = chart} width='auto' height='auto' />
         </section>
         <div className='grid grid-cols-2 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>

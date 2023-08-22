@@ -65,7 +65,7 @@ const DataFrameEditor: React.FC<DataFrameEditorProps> = ({ frameKey, index, hand
   })();
 
   return (
-    <div className='w-full bg-zinc-600 px-4 py-3 mb-5 transition rounded-lg block'>
+    <div className='w-full bg-slate-200 px-4 py-3 mb-5 transition rounded-lg block'>
       <div className='grid grid-cols-12 pb-2'>
         <div className='col-span-11'>
           <div className='text-md md:text-lg font-bold pb-2'>DataFrame Key: {frameKey} / Index: {index}</div>
@@ -77,8 +77,7 @@ const DataFrameEditor: React.FC<DataFrameEditorProps> = ({ frameKey, index, hand
                 setFrameTime(Number(e.target.value));
                 frameTimeRefs.current[index].current = Number(e.target.value);
               }}
-              className='inline border-2 border-zinc-700 bg-zinc-600 mx-2 px-2 py-1 w-12  text-center rounded-lg text-sm'
-              style={{ display: textareaVisibility[frameKey] ? 'none' : 'block' }}
+              className='inline focus:border-1 focus:border-orange-400 focus:outline-orange-400 focus:outline-none bg-slate-50 mx-2 px-2 py-1 w-16 text-center rounded-lg text-sm'
             />
           </div>
         </div>
@@ -111,7 +110,7 @@ const DataFrameEditor: React.FC<DataFrameEditorProps> = ({ frameKey, index, hand
           setFrame(e.target.value);
           frameRefs.current[index].current = e.target.value;
         }}
-        className='w-full h-48 p-2 my-2 rounded-lg bg-zinc-800 focus:outline-main'
+        className='w-full h-48 p-2 my-2 rounded-lg bg-slate-50 focus:outline-none'
         style={{ display: textareaVisibility[frameKey] ? 'none' : 'block' }}
       />
       {/* 可视化编辑器 */}
