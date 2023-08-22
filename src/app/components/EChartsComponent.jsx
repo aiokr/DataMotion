@@ -7,7 +7,10 @@ export default function EChartsComponent({ width, height, option, onChartReady }
   const chartRef = useRef(null);
 
   useEffect(() => {
-    const chartInstance = echarts.init(chartRef.current, null, { renderer: 'canvas' });;
+    const chartInstance = echarts.init(chartRef.current, null, {
+      renderer: 'svg',
+      useDirtyRect: false //
+    });;
     chartInstance.setOption(option);
 
     // 调用 onChartReady 函数，并将图表实例作为参数传递
@@ -21,7 +24,8 @@ export default function EChartsComponent({ width, height, option, onChartReady }
   useEffect(() => {
     const chartInstance = echarts.getInstanceByDom(chartRef.current);
     chartInstance.resize({ width, height });
+    window.addEventListener('resize', chartInstance.resize);
   }, [width, height]);
 
-  return (<div ref={chartRef} style={{ width: '100%', height: '100%' }} />);
+  return (<div ref={chartRef} style={{ width: '100%', height: '100%', zIndex: 0}} />);
 }

@@ -28,7 +28,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "src/app/FuncContext.jxs"  ],
   "exclude": [
     "node_modules"
   ]

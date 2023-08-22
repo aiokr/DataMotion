@@ -4,13 +4,16 @@ import React, { useState, useRef, useEffect, createRef, RefObject } from 'react'
 import { Combobox } from '@headlessui/react'
 import EChartsComponent from './components/EChartsComponent';
 import NeoFrameEditor from './components/FrameEditor';
-
+import AppHeader from './components/AppHeader'
 import barTemplate from './components/echartOpt/bar.json';
 import lineTemplate from './components/echartOpt/line.json';
 import pieTemplate from './components/echartOpt/pie.json';
 
-const chartModeList: string[] = [
-  'Bar', 'Line', 'SmoothLine', 'Pie', 'Customize'
+const chartModeList = [
+  { id: 0, name: 'Blank Frame' },
+  { id: 1, name: 'Bar', Template: barTemplate },
+  { id: 2, name: 'Line', Template: lineTemplate },
+  { id: 3, name: 'Pie', Template: pieTemplate },
 ]
 
 const HomePage: React.FC = () => {
@@ -44,16 +47,8 @@ const HomePage: React.FC = () => {
   const [NeoEditVisibility, setNeoEditVisibility] = useState<Record<number, boolean>>({});
   const [newFrameContent, setNewFrameContent] = useState<string>('');
   const [newFrameTime, setNewFrameTime] = useState<number>(0);
-  const [chartMode, setChartMode] = useState<string>(chartModeList[0]);
+  const [chartMode, setChartMode] = useState<string>(chartModeList[0].name);
   const [query, setQuery] = useState<string>('')
-
-
-  const filteredChartMode =
-    query === ''
-      ? chartModeList
-      : chartModeList.filter((chartMode) => {
-        return chartMode.toLowerCase().includes(query.toLowerCase())
-      })
 
   // Play 按钮，播放当前完整的图表动画
   const handleClick = () => {
@@ -130,24 +125,19 @@ const HomePage: React.FC = () => {
       console.error('frameTime is not a number:', frameTime);
       return;
     }
-
-
-
-
-    console.log(frameContent, frameTime)
   };
 
   // 根据模板新建关键帧
-  const newTemplateFrame = () => {
+  const newTemplateFrame = (chartModeId: number) => {
     let templateContent;
-    if (chartMode === 'Bar') { // 新建柱状图
-      templateContent = JSON.stringify(barTemplate, null, 5);
-    } else if (chartMode === 'Line') { // 新建折线图
-      templateContent = JSON.stringify(lineTemplate, null, 5);
-    } else if (chartMode === 'Pie') { // 新建饼图
-      templateContent = JSON.stringify(pieTemplate, null, 5);
-    } else {
-      templateContent = 'There is no template for this type';
+    let i = 0;
+    console.log(chartModeId)
+    while (i < chartModeList.length) {
+      if (chartModeId === chartModeList[i].id) {
+        templateContent = JSON.stringify(chartModeList[i].Template, null, 5);
+        break;
+      }
+      i++;
     }
     newFrame(templateContent, 5);
   }
@@ -337,69 +327,60 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <main className="grid grid-cols-none grid-rows-6 md:grid-rows-none md:grid-cols-12 h-screen w-screen gap-6 p-6 bg-slate-100 text-zinc-900">
-      <div className='row-span-2 md:col-span-6'>
-        <section id='ChartArea' className='aspect-video bg-white p-2 w-[95%] my-0 mx-[auto] md:w-full shadow-2xl'>
-          <EChartsComponent option={option} onChartReady={chart => chartRef.current = chart} width='auto' height='auto' />
-        </section>
-        <div className='grid grid-cols-2 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
-          <button onClick={handleClick} className='block py-1 px-2 text-md text-main border-main border-2 rounded-lg' data-umami-event="playMotion">Play DataMotion</button>
-        </div>
-        <div className='grid grid-cols-6 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
-          <button onClick={setWhiteBg} className='block py-1 px-1 text-xs text-white border-white border-2 rounded-lg'>White Screen</button>
-          <button onClick={setBlueBg} className='block py-1 px-1 text-xs text-blue-500 border-blue-500 border-2 rounded-lg'>Blue Screen</button>
-          <button onClick={setGreenBg} className='block py-1 px-1 text-xs text-green-500 border-green-500 border-2 rounded-lg'>Green Screen</button>
-          <input type="file" accept="image/*" onChange={setImageBg} className='block py-1 px-1 text-xs text-white border-white bg-transparent border-2 rounded-lg'></input>
-        </div>
-        <div className='flex flex-row gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
-          <button onClick={exportFile} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="exportFile">Export Json File</button>
-          <input type="file" onChange={importFile} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="importFile"></input>
-        </div>
-        <div className='flex flex-row gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
-          <button onClick={handleNewFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="newFrame">New Blank DataFrame</button>
-          <button onClick={newTemplateFrame} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="newFrame">New Template DataFrame</button>
-        </div>
-        <Combobox value={chartMode} onChange={setChartMode}>
-          <div className='flex flex-row gap-2'>
-            <Combobox.Input onChange={(event) => setQuery(event.target.value)} className='grow bg-zinc-800 py-1 border-2 text-center rounded-lg' />
-            <Combobox.Button className="bg-zinc-800 px-2 py-1 border-2 text-center rounded-lg">Choose Template</Combobox.Button>
+    <>
+      <AppHeader
+        handleClick={handleClick}
+        newTemplateFrame={newTemplateFrame}
+        chartMode={chartMode}
+        chartModeList={chartModeList}
+        exportFile={exportFile}
+      />
+      <main className="grid grid-cols-none grid-rows-6 md:grid-rows-none md:grid-cols-12 h-[calc(100vh)] w-screen gap-6 p-6 pt-[80px] bg-slate-100 text-zinc-900">
+        <div className='row-span-2 md:col-span-6'>
+          <section id='ChartArea' className='aspect-video bg-white p-2 w-[95%] my-0 mx-[auto] md:w-full'>
+            <EChartsComponent option={option} onChartReady={chart => chartRef.current = chart} width='auto' height='auto' />
+          </section>
+          <div className='grid grid-cols-2 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
+            <button onClick={handleClick} className='block py-2 px-2 text-md text-white bg-main rounded-lg' data-umami-event="playMotion">Play DataMotion</button>
           </div>
-          <Combobox.Options className='relative text-center shadow-lg bg-zinc-800 mt-2 py-1 border rounded-lg'>
-            {filteredChartMode.map((chartMode) => (
-              <Combobox.Option key={chartMode} value={chartMode}>
-                {chartMode}
-              </Combobox.Option>
+          <div className='grid grid-cols-6 gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
+            <button onClick={setWhiteBg} className='block py-1 px-1 text-xs text-main bg-white rounded-lg'>White Screen</button>
+            <button onClick={setBlueBg} className='block py-1 px-1 text-xs text-white bg-blue-500 rounded-lg'>Blue Screen</button>
+            <button onClick={setGreenBg} className='block py-1 px-1 text-xs text-white bg-green-500 rounded-lg'>Green Screen</button>
+            <input type="file" accept="image/*" onChange={setImageBg} className='block py-1 px-1 text-xs text-white border-white bg-transparent border-2 rounded-lg'></input>
+          </div>
+          <div className='flex flex-row gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
+            <button onClick={exportFile} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="exportFile">Export Json File</button>
+            <input type="file" onChange={importFile} className='flex-1 py-1 px-2 text-md  border-2 rounded-lg' data-umami-event="importFile"></input>
+          </div>
+        </div>
+        <section id="EditArea" className='row-span-4 md:col-span-6'>
+          <div className='pb-2 overflow-y-auto h-[80%] w-[95%] md:w-full md:h-[calc(100vh-140px)] mx-[auto]'>
+            {frames.map((key, index) => (
+              <NeoFrameEditor
+                key={key}      // key 无法作为 props 传递到子组件
+                frameKey={key} // 因此设立一个 frameKey 作为 key
+                index={index}
+                handleMoveUp={handleMoveUp}
+                handleMoveDown={handleMoveDown}
+                toggleTextarea={toggleTextarea}
+                toggleNewEditor={toggleNewEditor}
+                textareaVisibility={textareaVisibility}
+                NeoEditVisibility={NeoEditVisibility}
+                preivewFrame={preivewFrame}
+                duplicateFrame={duplicateFrame}
+                handleDeleteFrame={handleDeleteFrame}
+                frameTimeRefs={frameTimeRefs}
+                frameRefs={frameRefs}
+                chartMode={chartMode} // chartMode 用于记录当前的图表模式
+              />
             ))}
-          </Combobox.Options>
-        </Combobox>
-      </div>
-      <section id="EditArea" className='row-span-4 md:col-span-6'>
-        <div className='text-xl font-medium pb-2'>DataFrame Editor</div>
-        <div className='pb-2 overflow-y-auto h-[80%] w-[95%] md:w-full md:h-[calc(100vh-140px)] mx-[auto]'>
-          {frames.map((key, index) => (
-            <NeoFrameEditor
-              key={key}      // key 无法作为 props 传递到子组件
-              frameKey={key} // 因此设立一个 frameKey 作为 key
-              index={index}
-              handleMoveUp={handleMoveUp}
-              handleMoveDown={handleMoveDown}
-              toggleTextarea={toggleTextarea}
-              toggleNewEditor={toggleNewEditor}
-              textareaVisibility={textareaVisibility}
-              NeoEditVisibility={NeoEditVisibility}
-              preivewFrame={preivewFrame}
-              duplicateFrame={duplicateFrame}
-              handleDeleteFrame={handleDeleteFrame}
-              frameTimeRefs={frameTimeRefs}
-              frameRefs={frameRefs}
-              chartMode={chartMode} // chartMode 用于记录当前的图表模式
-            />
-          ))}
-        </div>
-        <div id='EditFloatButton' className='flex gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
-        </div>
-      </section>
-    </main >
+          </div>
+          <div id='EditFloatButton' className='flex gap-2 my-4 w-[95%] md:w-full mx-[auto]'>
+          </div>
+        </section>
+      </main >
+    </>
   );
 }
 

@@ -77,17 +77,17 @@ const DataFrameEditor: React.FC<DataFrameEditorProps> = ({ frameKey, index, hand
                 setFrameTime(Number(e.target.value));
                 frameTimeRefs.current[index].current = Number(e.target.value);
               }}
-              className='inline focus:border-1 focus:border-orange-400 focus:outline-orange-400 focus:outline-none bg-slate-50 mx-2 px-2 py-1 w-16 text-center rounded-lg text-sm'
+              className='inline focus:border-1 focus:outline-main bg-slate-50 mx-2 px-2 py-1 w-16 text-center rounded-lg text-sm'
             />
           </div>
         </div>
         <div className='col-span-1 grid grid-rows-2 gap-1 pb-4'>
-          <button onClick={() => handleMoveUp(frameKey)} className='bg-zinc-500 rounded-lg text-sm'>
+          <button onClick={() => handleMoveUp(frameKey)} className='bg-slate-300 text-slate-50 rounded-lg text-sm'>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 m-[auto]">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
             </svg>
           </button>
-          <button onClick={() => handleMoveDown(frameKey)} className='bg-zinc-500 rounded-lg text-sm'>
+          <button onClick={() => handleMoveDown(frameKey)} className='bg-slate-300 text-slate-50 rounded-lg text-sm'>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 m-[auto]">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
             </svg>
@@ -96,10 +96,10 @@ const DataFrameEditor: React.FC<DataFrameEditorProps> = ({ frameKey, index, hand
       </div>
       {/* 编辑器显示/隐藏按钮 */}
       <div className='mt-4 flex gap-2'>
-        <button onClick={() => toggleTextarea(frameKey)} className="flex-1 rounded-lg text-sm py-1 border-2 border-zinc-700" data-umami-event="toggleCodeEditor">
+        <button onClick={() => toggleTextarea(frameKey)} className="flex-1 rounded-lg text-sm py-1 border-2 border-zinc-700">
           Code Editor
         </button>
-        <button onClick={() => toggleNewEditor(frameKey)} className="flex-1 rounded-lg text-sm py-1 border-2 border-zinc-700" data-umami-event="toggleNeoEditor">
+        <button onClick={() => toggleNewEditor(frameKey)} className="flex-1 rounded-lg text-sm py-1 border-2 border-zinc-700">
           Neo Editor
         </button>
       </div>
@@ -110,7 +110,7 @@ const DataFrameEditor: React.FC<DataFrameEditorProps> = ({ frameKey, index, hand
           setFrame(e.target.value);
           frameRefs.current[index].current = e.target.value;
         }}
-        className='w-full h-48 p-2 my-2 rounded-lg bg-slate-50 focus:outline-none'
+        className='w-full h-48 p-2 my-2 rounded-lg bg-slate-50 focus:outline-main'
         style={{ display: textareaVisibility[frameKey] ? 'none' : 'block' }}
       />
       {/* 可视化编辑器 */}
